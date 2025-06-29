@@ -12,7 +12,7 @@
                                         hide-details="auto" variant="underlined" color="info"
                                         label="Nombre de la unidad de medidad"
                                         @input="txtregdata.nombre = $event.target.value.toUpperCase()"></v-text-field>
-                                </v-col>                                
+                                </v-col>
                             </v-row>
                             <v-card-actions>
                                 <v-btn class="ms-auto" text="Cerrar" @click="dialogEdit = false"></v-btn>
@@ -30,32 +30,34 @@
     </v-chip>
     <br>
     <br>
-    <table>
-        <thead>
-            <tr>                
-                <th class="text-left">
-                   Unidades de Medida
-                </th>               
-                <th class="text-left">
-                    Acciones
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="mac in medidasList" :key="mac.id">              
-                <td>{{ mac.nombre }}</td>
-              
-                <td>
-                    <v-btn color="dark" @click="selecMedida(mac.id), dialogEdit = true" density="comfortable"
-                        icon="mdi mdi-square-edit-outline" title="Editar"></v-btn>
-                    <v-btn color="dark" @click="deleteMedida(mac.id,mac.nombre)" density="comfortable"
-                        icon="mdi mdi-delete-forever" title="Eliminar"></v-btn>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="text-left">
+                        Unidades de Medida
+                    </th>
+                    <th class="text-left">
+                        Acciones
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="mac in medidasList" :key="mac.id">
+                    <td>{{ mac.nombre }}</td>
+
+                    <td>
+                        <v-btn color="dark" @click="selecMedida(mac.id), dialogEdit = true" density="comfortable"
+                            icon="mdi mdi-square-edit-outline" title="Editar"></v-btn>
+                        <v-btn color="dark" @click="deleteMedida(mac.id, mac.nombre)" density="comfortable"
+                            icon="mdi mdi-delete-forever" title="Eliminar"></v-btn>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <br>
-    
+
     <v-snackbar v-model="snackbarReg" :timeout="timeout">
         <h3 v-if="regerrormsg" class="text-error">{{ regerrormsg }}</h3>
         <h3 v-if="regsuccessmsg" class="text-success">{{ regsuccessmsg }}</h3>
@@ -99,14 +101,14 @@ const nuevaUnidad = () => {
     editando.value = true;
     dialogEdit.value = true
     txtregdata.value.nombre = ''
-   
+
 }
 
 const registrar = async () => {
     await register(url + 'api/unidadmedidas', txtregdata.value);
     dialogEdit.value = false
     snackbarReg.value = true
-    txtregdata.value.nombre = '' 
+    txtregdata.value.nombre = ''
     editando.value = true;
     getMedidas()
 }
@@ -115,7 +117,7 @@ const actualizar = async () => {
     await update(url + 'api/unidadmedidas/' + txtregdata.value.id, txtregdata.value);
     dialogEdit.value = false
     snackbarUpd.value = true
-    txtregdata.value.nombre = ''    
+    txtregdata.value.nombre = ''
     editando.value = false;
     getMedidas()
 }
@@ -124,13 +126,13 @@ const selecMedida = async (id) => {
     editando.value = false;
     try {
         const res = await axiosInst.get(url + 'api/unidadmedidas/' + id)
-        txtregdata.value = res.data        
+        txtregdata.value = res.data
     } catch (err) {
         alert(err)
     }
 }
 
-const getMedidas = async ( ) => {
+const getMedidas = async () => {
     try {
         const res = await axiosInst.get(url + 'api/unidadmedidas')
         medidasList.value = res.data
@@ -139,7 +141,7 @@ const getMedidas = async ( ) => {
     }
 };
 
-const deleteMedida = async (id,Medida) => {
+const deleteMedida = async (id, Medida) => {
     let confirmac = confirm('Eliminar? ' + Medida);
     if (confirmac) {
         const res = await axiosInst.delete(url + 'api/unidadmedidas/' + id);

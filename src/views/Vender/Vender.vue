@@ -1,71 +1,75 @@
 <template>
     <v-row class="bg-containerBg position-relative" no-gutters>
+        <!-- FORMULARIO DE BÚSQUEDA -->
+        <v-col cols="12">
+            <v-card class="text-center pa-4">
+                <v-form @submit.prevent="searchCodigo()" class="mt-1 loginForm">
+                    <v-row>
+                        <v-col cols="12" md="2">
+                            <v-text-field ref="codigoBarrasInput" v-model="txtregdata.codigo_barras"
+                                variant="underlined" color="info" label="Código" hide-details="auto" />
+                        </v-col>
 
-        <v-card max-width="auto" class="text-center pa-4">
-            <v-form @submit.prevent="searchCodigo()" class="mt-1 loginForm">
-                <v-row>
-                    <v-col cols="12" md="2">
-                        <v-text-field ref="codigoBarrasInput" v-model="txtregdata.codigo_barras" hide-details="auto"
-                            variant="underlined" color="info" label="Codigo"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="8">
-                        <v-combobox v-model="selectedId" :items="productResults" item-title="nombre"
-                            item-value="codigo_barras" variant="underlined" v-model:search="nomBuscar" label="Buscar"
-                            hide-details="auto"></v-combobox>
-                    </v-col>
+                        <v-col cols="12" md="4">
+                            <v-combobox v-model="selectedId" :items="productResults" item-title="nombre"
+                                item-value="codigo_barras" variant="underlined" v-model:search="nomBuscar"
+                                label="Buscar" hide-details="auto" clearable />
+                        </v-col>
 
-                    <v-col cols="12" md="2">
-                        <v-btn color="success" hidden type="submit">Agregar</v-btn>
-                    </v-col>
-                </v-row>
-            </v-form>
-            <br>
-        </v-card>
-
-        <v-col cols="12" md="6">
-
-            <table>
-                <thead>
-                    <tr>
-                        <th class="text-left">
-                            <h4 class="text-success"> Productos: {{ itemsVenta.length }}</h4>
-                        </th>
-                        <th class="text-left">
-                            U/M
-                        </th>
-                        <th class="text-left">
-                            Cantidad
-                        </th>
-                        <th class="text-left">
-                            +/-
-                        </th>
-                        <th class="text-left">
-                            Precio
-                        </th>
-                        <th class="text-left">
-                            Quitar
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item in itemsVenta" :key="item.id">
-                        <td><small>{{ item.nombre }}</small></td>
-                        <td><small>{{ item.unidad_medida }}</small></td>
-                        <td><v-text-field v-model="item.cantidad" type="number" min="1" variant="underlined"
-                                color="info"></v-text-field></td>
-                        <td>
-                            <v-btn color="dark" @click="addcantItem(item.id)" density="compact" icon="mdi mdi-plus"
-                                title="aumentar"></v-btn>
-                            <v-btn color="dark" @click="restcantItem(item.id)" density="compact" icon="mdi mdi-minus"
-                                title="restar"></v-btn>
-                        </td>
-                        <td><small>$ {{ parseFloat(item.precio_final).toLocaleString('es-ES') }}</small></td>
-                        <td><v-btn color="dark" @click="deleteItem(item.id)" density="comfortable"
-                                icon="mdi mdi-delete-forever" title="Eliminar"></v-btn></td>
-                    </tr>
-                </tbody>
-            </table>
+                        <v-col cols="12" md="2">
+                            <v-btn color="success" hidden type="submit">Agregar</v-btn>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card>
         </v-col>
+        <!-- TABLA DE PRODUCTOS AGREGADOS -->
+        <v-col cols="12" md="6" class="pa-2">
+  <v-table density="compact" class="text-caption">
+    <thead>
+      <tr>
+        <th class="text-left py-1">
+          <span class="text-success">Productos: {{ itemsVenta.length }}</span>
+        </th>
+        <th class="text-left py-1">U/M</th>
+        <th class="text-left py-1">Cantidad</th>
+        <th class="text-left py-1">Precio</th>
+        <th class="text-left py-1">Quitar</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="item in itemsVenta" :key="item.id" class="py-0">
+        <td><small>{{ item.nombre }}</small></td>
+        <td><small>{{ item.unidad_medida }}</small></td>
+        <td>
+          <v-text-field
+            v-model="item.cantidad"
+            type="number"
+            min="1"
+            variant="underlined"
+            density="compact"
+            hide-details
+            class="ma-0 pa-0"
+            style="max-width: 60px;"
+          />
+        </td>
+        <td>
+          <small>$ {{ parseFloat(item.precio_final).toLocaleString('es-ES') }}</small>
+        </td>
+        <td>
+          <v-btn
+            icon="mdi-delete-forever"
+            color="dark"
+            density="compact"
+            class="ma-0 pa-0"
+            @click="deleteItem(item.id)"
+          />
+        </td>
+      </tr>
+    </tbody>
+  </v-table>
+</v-col>
+
         <br>
 
         <!--dialog editcliente-->
@@ -214,11 +218,13 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import axiosInst from '@/components/axiosins'
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router'
+import useRegister from '@/composables/useRegister'
 import Clientes from '../Clientes/Clientes.vue';
 
 const router = useRouter()
 const url = import.meta.env.VITE_APP_API_URL;
 const authStore = useAuthStore();
+const { register } = useRegister();
 const search = ref('');
 const clientesRef = ref(null);
 const codigoBarrasInput = ref(null);
@@ -410,18 +416,44 @@ const restcantItem = (id) => {
 
 
 const clienteFinal = async (cedula) => {
+    const txtregdata = {
+        tipoidentificacion: 'CÉDULA DE CIUDADANÍA',
+        numidentificacion: cedula,
+        nombres: 'CONSUMIDOR',
+        apellidos: 'FINAL',
+    };
 
     try {
-        const res = await axiosInst.get(url + 'api/clientefinal/' + cedula)
-        datosVenta.value.cliente_id = res.data.id
-        datosVenta.value.numidentificacion = res.data.numidentificacion
-        datosVenta.value.nombres = res.data.nombres + ' ' + res.data.apellidos
-        search.value = []
+        let res;
+
+        try {
+            // Intentar obtener el cliente final
+            res = await axiosInst.get(url + 'api/clientefinal/' + cedula);
+        } catch (error) {
+            // Si no existe (404), lo crea
+            if (error.response && error.response.status === 404) {
+                await register(url + 'api/clientes', txtregdata);
+
+                // Luego vuelve a buscarlo para obtener el ID y demás datos actualizados
+                res = await axiosInst.get(url + 'api/clientefinal/' + cedula);
+            } else {
+                throw error; // Si es otro error diferente, lo lanza
+            }
+        }
+
+        // Asignar los datos al formulario
+        datosVenta.value.cliente_id = res.data.id;
+        datosVenta.value.numidentificacion = res.data.numidentificacion;
+        datosVenta.value.nombres = `${res.data.nombres} ${res.data.apellidos}`;
+        search.value = [];
+
     } catch (err) {
-        alert('No existe cliente final creado con CC 222222222222 (2 x 12), crear en el modulo de clientes')
-        router.push('/clientes')
+        alert('Error procesando el cliente final. Redirigiendo al módulo de clientes.');
+        router.push('/clientes');
     }
-}
+};
+
+
 
 const buscarCliente = async () => {
     try {

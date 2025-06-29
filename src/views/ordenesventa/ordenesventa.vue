@@ -1,5 +1,5 @@
 <template>
-  <v-alert text="Registro de ventas POS" title="Facturas de Ventas" type="info"
+  <v-alert text="Registro de ventas POS" title="Facturas de Ventas" type="primary"
     icon="mdi-ballot-recount-outline"></v-alert><br>
   <v-container>
     <v-row>
@@ -176,7 +176,8 @@
                   <td class="text-right"><small>{{ detalle.iva }}</small></td>
                   <td class="text-right"><small>{{ detalle.ibua }}</small></td>
                   <td class="text-right"><small>{{ detalle.ipc }}</small></td>
-                  <td class="text-right"><small>${{ (Number(detalle.cantidad) * Number(detalle.precio_unitario)
+                  <td class="text-right"><small>${{ (Number(detalle.cantidad) * Number(detalle.precio_unitario) +
+                  Number(detalle.iva) + Number(detalle.ibua) +  Number(detalle.ipc)
                   ).toLocaleString('es-ES') }}
                     </small></td>
                 </tr>

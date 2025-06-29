@@ -130,7 +130,7 @@
                     <tbody>
                         <tr v-for="pro in topProdVendido" :key="pro.producto_id">
                             <td><small>{{ pro.producto.nombre }}</small></td>
-                            <td><small>{{ pro.total_vendido }}</small></td>
+                            <td><small>{{ Number(pro.total_vendido) % 1 === 0 ? Number(pro.total_vendido) : Number(pro.total_vendido).toFixed(3) }}</small></td>
                         </tr>
                     </tbody>
                 </table>

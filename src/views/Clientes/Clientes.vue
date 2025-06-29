@@ -1,5 +1,5 @@
 <template>
-    <v-alert text="Cree clientes que podrá agregar a las facturas de venta" title="Creación de Clientes" type="info"
+    <v-alert text="Cree clientes que podrá agregar a las facturas de venta" title="Creación de Clientes" type="primary"
         icon="mdi-account-multiple-outline"></v-alert>
     <v-row class="bg-containerBg position-relative" no-gutters>
 

@@ -8,7 +8,7 @@ import {
   EditOutlined,
   ProfileOutlined,
 } from '@ant-design/icons-vue';
-import Pusher from 'pusher-js';
+
 
 const authStore = useAuthStore();
 const tab = ref(null);
@@ -50,10 +50,7 @@ const sticky = false;
     class="overflow-auto mx-auto"
     max-height="300"
     width="448"
-  >   
-  
-    <v-alert v-for="(mensajepush, index) in mensajepush" :key="index"  :text="( mensajepush )" type="info" variant="outlined"></v-alert>
-             
+  >        
 
     <v-card-text class="bg-grey-lighten-4">
       <v-sheet
@@ -65,9 +62,6 @@ const sticky = false;
   </v-card>
     </v-menu>
   </div>
-
-   
-
     <v-menu :close-on-content-click="true" offset="8, 0">
       <template v-slot:activator="{ props }">
         <v-btn class="profileBtn" variant="text" rounded="sm" v-bind="props">

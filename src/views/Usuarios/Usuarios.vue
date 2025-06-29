@@ -1,5 +1,5 @@
 <template>
-    <v-alert text="Cree usuarios administradores o cajeros vendedores" title="Creación de Usuarios" type="info"
+    <v-alert text="Cree usuarios administradores o cajeros vendedores" title="Creación de Usuarios" type="primary"
         icon="mdi-account-plus-outline"></v-alert>
     <br>
     <v-btn @click="nuevoUser" icon="mdi mdi-plus" density="compact"></v-btn>

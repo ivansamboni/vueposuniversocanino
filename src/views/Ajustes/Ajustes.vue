@@ -1,5 +1,5 @@
 <template>
-    <v-alert text="Ajuste stock de productos" title="Ajustes" type="info" icon="mdi-archive-edit-outline"></v-alert>
+    <v-alert text="Ajuste stock de productos" title="Ajustes" type="primary" icon="mdi-archive-edit-outline"></v-alert>
     <br>
     <v-chip label color="primary" text-color="primary">
         <v-btn @click="nuevaCompra" icon="mdi mdi-plus" name="compra" title="Nueva compra" density="compact"></v-btn>

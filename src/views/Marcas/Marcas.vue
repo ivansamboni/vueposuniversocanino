@@ -2,7 +2,7 @@
            <v-alert
     text="Cree marcas y asocielas a productos"
     title="Creación de Marcas"
-    type="info"
+    type="primary"
      icon="mdi-apple"
   ></v-alert>
     <v-row class="bg-containerBg position-relative" no-gutters>
@@ -37,7 +37,8 @@
     </v-row>
     <v-btn @click="nuevaMarca" icon="mdi mdi-plus" density="compact"></v-btn>
     <br><br>
-    <table>
+    <div class="table-responsive">
+        <table class="table">
         <thead>
             <tr>
                 <th class="text-left">
@@ -68,6 +69,7 @@
             </tr>
         </tbody>
     </table>
+</div>
     <br>
     <div class="text-center">
         <v-btn @click="getMarcas(marcasList.prev_page_url)" :disabled="!marcasList.prev_page_url"

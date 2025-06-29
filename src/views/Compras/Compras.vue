@@ -1,5 +1,5 @@
 <template>
-  <v-alert text="Ingreso de facturas de compra, actualice precios y stock" title="Facturas de Compras" type="info"
+  <v-alert text="Ingreso de facturas de compra, actualice precios y stock" title="Facturas de Compras" type="primary"
     icon="mdi-ballot-recount-outline"></v-alert>
   <v-chip label color="primary" text-color="primary">
    
@@ -59,7 +59,7 @@
                         </v-btn>
                       </div>
                     </v-card-title>
-                    <table density="comfortable" fixed-header height="200px">
+                    <v-table density="comfortable" fixed-header height="200px">
                       <thead>
                         <tr>
                           <th>Código</th>
@@ -103,7 +103,7 @@
                           </td>
                         </tr>
                       </tbody>
-                    </table>
+                    </v-table>
                     <v-pagination v-model="currentPage" :length="lastPage" :total-visible="5"
                       @update:modelValue="fetchProductos" />
                   </v-card>
@@ -147,7 +147,7 @@
               Quita Todos
             </v-btn>
           </div>
-          <table density="comfortable" fixed-header height="300px">
+          <v-table density="comfortable" fixed-header height="300px">
             <thead>
               <tr>
                 <th style="min-width: 100px;">Código</th>
@@ -208,7 +208,7 @@
                 </td>
               </tr>
             </tbody>
-          </table>
+          </v-table>
           <br>
           <br>
         </v-card>

@@ -1,6 +1,6 @@
 <template>
       <v-alert text="Cree categorías y vinculelos a los productos para una mejor busqueda y orden de productos, antes de crear productos cree las categorías" 
-      title="Creación de Categorías" type="info"
+      title="Creación de Categorías" type="primary"
       icon="mdi-tag-multiple-outline"></v-alert>
     <v-row class="bg-containerBg position-relative" no-gutters>
 
@@ -34,7 +34,8 @@
     </v-row>
     <v-btn @click="nuevaCategoria" icon="mdi mdi-plus" density="compact"></v-btn>
     <br><br>
-    <table>
+    <div class="table-responsive">
+    <table class="table">
         <thead>
             <tr>
                 <th class="text-left">
@@ -65,6 +66,7 @@
             </tr>
         </tbody>
     </table>
+</div>
     <br>
     <div class="text-center">
         <v-btn @click="getCategorias(categoriasList.prev_page_url)" :disabled="!categoriasList.prev_page_url"

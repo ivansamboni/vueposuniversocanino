@@ -2,7 +2,7 @@
     <v-alert
       text=""
       title="Configuración del negocio"
-      type="info"
+      type="primary"
       icon="mdi-cog"
     ></v-alert>
   
@@ -119,16 +119,20 @@
       </v-card>
   
       <!-- Configuración adicional -->
-      <v-card class="pa-5" max-width="1000px" elevation="4">
-        <v-row>
+      
+        <v-row>          
           <v-col>
+            <v-card class="pa-5 mb-6" elevation="4">
             <Impuestos />
-          </v-col>
+          </v-card>
+          </v-col>      
           <v-col>
+            <v-card class="pa-5 mb-6" elevation="4">
             <UnidadesMedida />
+          </v-card>
           </v-col>
         </v-row>
-      </v-card>
+
     </v-container>
   
     <!-- Snackbar -->

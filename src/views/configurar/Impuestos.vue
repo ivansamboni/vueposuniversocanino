@@ -5,6 +5,11 @@
             <v-dialog width="600" v-model="dialogEdit">
                 <v-card max-width="600">
                     <v-card-text class="pa-sm-10 pa-6">
+                        <v-alert type="info" :value="true">
+                            El nombre del impuesto debe empezar con alguna de estas palabras: IBUA, IVA, IMPOCONSUMO
+                            seguido de su porcentaje ejemplo (IBUA 15% o IBUA 19% y su correspondiente valor en el campo
+                            valor)
+                        </v-alert><br><br>
                         <v-form @submit.prevent="registrar()" class="mt-1 loginForm">
                             <v-row>
                                 <v-col cols="12" md="6">
@@ -33,33 +38,35 @@
     </v-chip>
     <br>
     <br>
-    <table>
-        <thead>
-            <tr>
-                <th class="text-left">
-                    Impuesto
-                </th>
-                <th class="text-left">
-                    Valor %
-                </th>
-                <th class="text-left">
-                    Acciones
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="mac in ImpuestosList" :key="mac.id">
-                <td>{{ mac.nombre }}</td>
-                <td>{{ mac.valor }} %</td>
-                <td>
-                    <v-btn color="dark" @click="selecImpuesto(mac.id), dialogEdit = true" density="comfortable"
-                        icon="mdi mdi-square-edit-outline" title="Editar"></v-btn>
-                    <v-btn color="dark" @click="deleteImpuesto(mac.id, mac.nombre)" density="comfortable"
-                        icon="mdi mdi-delete-forever" title="Eliminar"></v-btn>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="text-left">
+                        Impuesto
+                    </th>
+                    <th class="text-left">
+                        Valor %
+                    </th>
+                    <th class="text-left">
+                        Acciones
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="mac in ImpuestosList" :key="mac.id">
+                    <td>{{ mac.nombre }}</td>
+                    <td>{{ mac.valor }} %</td>
+                    <td>
+                        <v-btn color="dark" @click="selecImpuesto(mac.id), dialogEdit = true" density="comfortable"
+                            icon="mdi mdi-square-edit-outline" title="Editar"></v-btn>
+                        <v-btn color="dark" @click="deleteImpuesto(mac.id, mac.nombre)" density="comfortable"
+                            icon="mdi mdi-delete-forever" title="Eliminar"></v-btn>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <br>
 
     <v-snackbar v-model="snackbarReg" :timeout="timeout">

@@ -1,6 +1,6 @@
 <template>
-    <v-alert text="Cree Productos, edite precios, stock, impuestos " title="Creación de Productos" type="info"
-        icon="mdi-shape"></v-alert>
+   <v-alert color="primary">PRODUCTOS
+    Cree Productos, edite precios, stock, impuestos</v-alert>
     <!--modalregistroedicionproductos-->
     <div class="text-center pa-1">
         <v-dialog v-model="dialogEdit" @update:model-value="onDialogToggle">
@@ -54,9 +54,10 @@
                                         </v-col>
                                         <v-col cols="12" md="2">
                                             <v-text-field label="Precio unitario" v-model="txtregdata.precio_venta"
-                                                type="number" hide-details="auto" variant="underlined" color="info" clearable/>
-                                            <v-text-field v-model="txtregdata.precio_venta_ajustado" 
-                                                type="number" hidden></v-text-field>
+                                                type="number" hide-details="auto" variant="underlined" color="info"
+                                                clearable />
+                                            <v-text-field v-model="txtregdata.precio_venta_ajustado" type="number"
+                                                hidden></v-text-field>
                                         </v-col>
                                     </v-row>
                                     <v-row>
@@ -158,7 +159,7 @@
                                         <tr>
                                             <td>{{ txtregdata.nombre }}</td>
                                             <td>$ {{ parseFloat(txtregdata.precio_venta).toLocaleString('es-ES')
-                                            }}</td>
+                                                }}</td>
                                             <td>{{ getImpuestoValor(txtregdata.iva_id, ivaList) }}</td>
                                             <td>{{ getImpuestoValor(txtregdata.ibua_id, ibuaList) }}</td>
                                             <td>{{ getImpuestoValor(txtregdata.ipc_id, ipcList) }}</td>
@@ -185,36 +186,46 @@
     <v-card max-width="auto" class="text-center pa-4">
         <v-form @submit.prevent="searchCodigo()" class="mt-1 loginForm">
             <v-row>
+                <!-- CÓDIGO DE BARRAS -->
                 <v-col cols="12" md="2">
-                    <v-text-field ref="codigoBarrasInput" v-model="txtregdata.codigo_barras" hide-details="auto"
-                        variant="underlined" color="info" label="Codigo" clearable></v-text-field><br>
+                    <v-text-field ref="codigoBarrasInput" v-model="txtregdata.codigo_barras" variant="underlined"
+                        color="info" label="Código" hide-details="auto" clearable />
                     <v-btn color="primary" size="small" @click="activarEscaner">
-                        Escanear Código
+                        Escanear <span class="mdi mdi-camera-outline"></span>
                     </v-btn>
-                    <div v-show="mostrarEscaner" id="reader" style="width: 100%; margin-top: 10px;"></div>
+                    <div v-show="mostrarEscaner" id="reader" class="mt-2" style="width: 100%;"></div>
                 </v-col>
+
+                <!-- BOTÓN DE BÚSQUEDA -->
                 <v-col cols="12" md="1">
                     <v-btn size="small" @click="searchCodigo()">
                         <span class="mdi mdi-magnify"></span>
                     </v-btn>
-                    <br>
-
                 </v-col>
+
+                <!-- COMBOBOX DE BÚSQUEDA -->
                 <v-col cols="12" md="5">
                     <v-combobox v-model="selectedId" :items="productResults" item-title="nombre"
                         item-value="codigo_barras" variant="underlined" v-model:search="nomBuscar" label="Buscar"
-                        hide-details="auto" clearable></v-combobox>
+                        hide-details="auto" clearable />
                 </v-col>
+
+                <!-- BOTÓN HIDDEN DE SUBMIT -->
                 <v-col cols="12" md="1">
                     <v-btn color="success" hidden type="submit">Buscar</v-btn>
                 </v-col>
+
+                <!-- NUEVO PRODUCTO -->
                 <v-col cols="12" md="1">
-                    <v-btn @click="nuevoProducto()" icon="mdi mdi-plus" density="default" title="Recargar"></v-btn>
+                    <v-btn @click="nuevoProducto()" icon="mdi mdi-plus" title="Nuevo producto" />
                 </v-col>
+
+                <!-- RECARGAR -->
                 <v-col cols="12" md="1">
-                    <v-btn @click="reload()" icon="mdi mdi-reload" density="default" title="Nuevo producto">
-                    </v-btn>
+                    <v-btn @click="reload()" icon="mdi mdi-reload" title="Recargar" />
                 </v-col>
+
+                <!-- MENÚ -->
                 <v-col cols="12" md="1">
                     <v-menu>
                         <template #activator="{ props }">
@@ -224,154 +235,119 @@
                         </template>
                         <v-list>
                             <v-list-item>
-                                <v-btn @click="reload()"><span class="mdi mdi-tray-arrow-down"></span> Exportar
-                                    CSV</v-btn>
+                                <v-btn @click="reload()">
+                                    <span class="mdi mdi-tray-arrow-down"></span> Exportar CSV
+                                </v-btn>
                             </v-list-item>
-                            <v-list-item>
-
-                            </v-list-item>
-
                         </v-list>
                     </v-menu>
-                    <!-- <form @submit.prevent="importarArchivo">
-                        <input type="file" @change="handleFileChange" accept=".csv,.xlsx" />
-                        <v-btn type="submit">Importar</v-btn>
-                        <p v-if="mensaje">{{ mensaje }}</p>
-                    </form>-->
                 </v-col>
             </v-row>
         </v-form>
-        <br>
     </v-card>
 
-    <v-alert color="info">
-        <h5>{{ totalProductos }} Productos</h5>
-    </v-alert>
+    <!-- TOTAL DE PRODUCTOS -->
+    <v-chip color="info">{{ totalProductos }} Productos</v-chip>
+
+    <!-- TABLA DE PRODUCTOS -->
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
-                    <th class="text-left">
-                        Imagen
-                    </th>
-                    <th class="text-left">
-                        Código
-                    </th>
-                    <th class="text-left">
-                        Producto
-                    </th>
-                    <th class="text-left">
-                        Cantidad
-                    </th>
-                    <th class="text-left">
-                        U/M
-                    </th>
-
-                    <th class="text-left">
-                        Proveedor
-                    </th>
-                    <th class="text-left">
-                        Iva
-                    </th>
-                    <th class="text-left">
-                        Precio final
-                    </th>
-                    <th class="text-left">
-                        Ganancia sin impuestos
-                    </th>
-
-                    <th class="text-left">
-                        Stock
-                    </th>
-                    <th class="text-left">
-                        Acciones
-                    </th>
+                    <th>Imagen</th>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>U/M</th>
+                    <th>Proveedor</th>
+                    <th>IVA</th>
+                    <th>Precio final</th>
+                    <th>Ganancias</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
-            <div class="text-center pa-4">
-                <v-dialog v-model="dialog2" max-width="400">
-                    <v-card>
-                        <v-card-text class="d-flex justify-center">
-                            <img :src="imgview ? url + 'archivos/folder_img_product/' + imgview : url + 'archivos/folder_img_product/sinimagen.png'"
-                                width="200" height="200" alt="Imagen del producto" />
-                        </v-card-text>
 
-                        <v-card-actions class="justify-end">
-                            <v-btn color="dark" @click="dialog2 = false">X Cerrar</v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-            </div>
+            <!-- DIALOGO DE IMAGEN -->
+            <v-dialog v-model="dialog2" max-width="400">
+                <v-card>
+                    <v-card-text class="d-flex justify-center">
+                        <img :src="imgview ? url + 'archivos/folder_img_product/' + imgview : url + 'archivos/folder_img_product/sinimagen.png'"
+                            width="400" height="400" alt="Imagen del producto" />
+                    </v-card-text>
+                    <v-card-actions class="justify-end">
+                        <v-btn color="dark" @click="dialog2 = false">X Cerrar</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
 
             <tbody>
+                <!-- CARGANDO -->
                 <tr v-show="trLoading">
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
-                    <td><v-skeleton-loader type="article"></v-skeleton-loader></td>
+                    <td colspan="11">
+                        <v-skeleton-loader type="article" class="mx-2" v-for="n in 11" :key="n" />
+                    </td>
                 </tr>
+
+                <!-- LISTADO DE PRODUCTOS -->
                 <tr v-for="pro in productosList" :key="pro.id">
-                    <td><a class="clickable-element" @click="dialog2 = true, imgview = pro.img1"><img
-                                :src="pro.img1 ? url + 'archivos/folder_img_product/' + pro.img1 : url + 'archivos/folder_img_product/sinimagen.png'"
-                                width="80" height="80" /></a></td>
+                    <td>
+                        <a class="clickable-element" @click="dialog2 = true; imgview = pro.img1">
+                            <img :src="pro.img1 ? url + 'archivos/folder_img_product/' + pro.img1 : url + 'archivos/folder_img_product/sinimagen.png'"
+                                width="40" height="40" />
+                        </a>
+                    </td>
                     <td><small>{{ pro.codigo_barras }}</small></td>
                     <td><small>{{ pro.nombre }}</small></td>
                     <td><small>{{ pro.cantidad }}</small></td>
                     <td><small>{{ pro.unidad_medida }}</small></td>
-
                     <td><small>{{ pro.proveedor?.nombres || '' }}</small></td>
-                    <td><small>{{ pro.iva ? parseFloat(pro.iva.valor).toLocaleString('es-ES') + '%' : '0'
-                    }}</small></td>
+                    <td><small>{{ pro.iva ? parseFloat(pro.iva.valor).toLocaleString('es-ES') + '%' : '0%' }}</small>
+                    </td>
                     <td><small>{{ parseFloat(pro.precio_final).toLocaleString('es-ES') }}</small></td>
                     <td><small>{{ parseFloat(pro.ganancia).toLocaleString('es-ES') }}</small></td>
                     <td><small>{{ pro.stock }}</small></td>
-                    <!--<td><small>{{ pro.proveedor?.nombres || '' }}</small></td>-->
-                    <td><small>
-                            <v-btn color="dark" v-bind="activatorProps" density="comfortable"
-                                icon="mdi mdi-square-edit-outline" title="Editar"
-                                @click="selecProducto(pro.id), dialogEdit = true"></v-btn>
-                            <v-btn color="dark" @click="deleteProducto(pro.id)" density="comfortable"
-                                icon="mdi mdi-delete-forever" title="Eliminar"></v-btn>
-                        </small></td>
+                    <td>
+                        <v-btn color="dark" icon="mdi mdi-square-edit-outline" density="comfortable" title="Editar"
+                            @click="selecProducto(pro.id); dialogEdit = true" />
+                        <v-btn color="dark" icon="mdi mdi-delete-forever" density="comfortable" title="Eliminar"
+                            @click="deleteProducto(pro.id)" />
+                    </td>
                 </tr>
+
+                <!-- RESULTADO INDIVIDUAL -->
                 <tr v-show="resultTable">
-                    <td><small><a class="clickable-element" @click="dialog2 = true, imgview = txtregdata.img1"><img
-                                    :src="txtregdata.img1 ? url + 'archivos/folder_img_product/' + txtregdata.img1 : url + 'archivos/folder_img_product/sinimagen.png'"
-                                    width="80" height="80" /></a></small></td>
+                    <td>
+                        <a class="clickable-element" @click="dialog2 = true; imgview = txtregdata.img1">
+                            <img :src="txtregdata.img1 ? url + 'archivos/folder_img_product/' + txtregdata.img1 : url + 'archivos/folder_img_product/sinimagen.png'"
+                                width="40" height="40" />
+                        </a>
+                    </td>
                     <td><small>{{ txtregdata.codigo_barras }}</small></td>
                     <td><small>{{ txtregdata.nombre }}</small></td>
                     <td><small>{{ txtregdata.cantidad }}</small></td>
                     <td><small>{{ txtregdata.unidad_medida }}</small></td>
                     <td><small>{{ txtregdata.proveedor_id || '' }}</small></td>
                     <td><small>{{ txtregdata.iva ? parseFloat(pro.iva.valor).toLocaleString('es-ES') + '%' : 'Iva'
-                    }}</small></td>
+                            }}</small></td>
                     <td><small>{{ parseFloat(txtregdata.precio_final).toLocaleString('es-ES') }}</small></td>
                     <td><small>{{ parseFloat(txtregdata.ganancia).toLocaleString('es-ES') }}</small></td>
                     <td><small>{{ txtregdata.stock }}</small></td>
-                    <!--<td><small>{{ pro.proveedor?.nombres || '' }}</small></td>-->
                     <td>
-                        <v-btn color="dark" v-bind="activatorProps" density="comfortable"
-                            icon="mdi mdi-square-edit-outline" title="Editar"
-                            @click="selecProducto(txtregdata.id), dialogEdit = true"></v-btn>
-
-                        <v-btn color="dark" @click="deleteProducto(txtregdata.id)" density="comfortable"
-                            icon="mdi mdi-delete-forever" title="Eliminar"></v-btn>
+                        <v-btn color="dark" icon="mdi mdi-square-edit-outline" density="comfortable" title="Editar"
+                            @click="selecProducto(txtregdata.id); dialogEdit = true" />
+                        <v-btn color="dark" icon="mdi mdi-delete-forever" density="comfortable" title="Eliminar"
+                            @click="deleteProducto(txtregdata.id)" />
                     </td>
                 </tr>
             </tbody>
-        </table>
+        </table>       
     </div>
-    <br>
+    <br />
+        <v-pagination v-model="currentPage" :length="lastPage" :total-visible="10" @update:modelValue="getProductos" />
 
-    <v-pagination v-model="currentPage" :length="lastPage" :total-visible="10" @update:modelValue="getProductos" />
+    <!-- PAGINACIÓN -->
+
 
     <v-snackbar v-model="snackbarReg" :timeout="timeout">
         <h3 v-if="regerrormsg" class="text-error">{{ regerrormsg }}</h3>
@@ -803,84 +779,84 @@ watch(
 
 // Watch 1: Si cambia el porcentaje, se actualiza precio_venta
 watch(
-  () => txtregdata.value.porcentajeGanancia,
-  (nuevoPorcentaje) => {
-    const precioBase = parseFloat(txtregdata.value.precio_compra) || 0;
-    const porcentaje = parseFloat(nuevoPorcentaje) || 0;
+    () => txtregdata.value.porcentajeGanancia,
+    (nuevoPorcentaje) => {
+        const precioBase = parseFloat(txtregdata.value.precio_compra) || 0;
+        const porcentaje = parseFloat(nuevoPorcentaje) || 0;
 
-    if (precioBase > 0 && porcentaje >= 0) {
-      const precioConGanancia = precioBase + (precioBase * (porcentaje / 100));
-      const precioRedondeado = parseFloat(precioConGanancia.toFixed(2));
+        if (precioBase > 0 && porcentaje >= 0) {
+            const precioConGanancia = precioBase + (precioBase * (porcentaje / 100));
+            const precioRedondeado = parseFloat(precioConGanancia.toFixed(2));
 
-      // Evita rebote si el precio ya es el esperado
-      if (parseFloat(txtregdata.value.precio_venta) !== precioRedondeado) {
-        txtregdata.value.precio_venta = precioRedondeado;
-      }
+            // Evita rebote si el precio ya es el esperado
+            if (parseFloat(txtregdata.value.precio_venta) !== precioRedondeado) {
+                txtregdata.value.precio_venta = precioRedondeado;
+            }
+        }
     }
-  }
 );
 
 // Watch 2: Si cambia el precio_venta manualmente, recalcula porcentajeGanancia
 watch(
-  () => txtregdata.value.precio_venta,
-  (nuevoPrecioVenta) => {
-    const base = parseFloat(txtregdata.value.precio_compra) || 0;
-    const venta = parseFloat(nuevoPrecioVenta) || 0;
+    () => txtregdata.value.precio_venta,
+    (nuevoPrecioVenta) => {
+        const base = parseFloat(txtregdata.value.precio_compra) || 0;
+        const venta = parseFloat(nuevoPrecioVenta) || 0;
 
-    if (base > 0 && venta >= base) {
-      const nuevoPorcentaje = ((venta - base) / base) * 100;
-      const porcentajeRedondeado = Math.round(nuevoPorcentaje);
+        if (base > 0 && venta >= base) {
+            const nuevoPorcentaje = ((venta - base) / base) * 100;
+            const porcentajeRedondeado = Math.round(nuevoPorcentaje);
 
-      // Evita rebote si el porcentaje ya coincide
-      if (txtregdata.value.porcentajeGanancia !== porcentajeRedondeado) {
-        txtregdata.value.porcentajeGanancia = porcentajeRedondeado;
-      }
+            // Evita rebote si el porcentaje ya coincide
+            if (txtregdata.value.porcentajeGanancia !== porcentajeRedondeado) {
+                txtregdata.value.porcentajeGanancia = porcentajeRedondeado;
+            }
+        }
     }
-  }
 );
 
 // Watch 3: Al cambiar cualquier campo de txtregdata, calcula impuestos y redondea precio
 watch(
-  txtregdata,
-  (nuevoValor) => {
-    const nuevoVenta = parseFloat(nuevoValor.precio_venta) || 0;
-    if (!nuevoVenta) return;
+    txtregdata,
+    (nuevoValor) => {
+        const nuevoVenta = parseFloat(nuevoValor.precio_venta) || 0;
+        if (!nuevoVenta) return;
 
-    const ivaObj = ImpuestosList.value.find(item => Number(item.id) === Number(nuevoValor.iva_id));
-    const ibuaObj = ImpuestosList.value.find(item => Number(item.id) === Number(nuevoValor.ibua_id));
-    const ipcObj = ImpuestosList.value.find(item => Number(item.id) === Number(nuevoValor.ipc_id));
+        const ivaObj = ImpuestosList.value.find(item => Number(item.id) === Number(nuevoValor.iva_id));
+        const ibuaObj = ImpuestosList.value.find(item => Number(item.id) === Number(nuevoValor.ibua_id));
+        const ipcObj = ImpuestosList.value.find(item => Number(item.id) === Number(nuevoValor.ipc_id));
 
-    const ivaPorcentaje = (ivaObj ? parseFloat(ivaObj.valor) : 0) / 100;
-    const ibuaPorcentaje = (ibuaObj ? parseFloat(ibuaObj.valor) : 0) / 100;
-    const ipcPorcentaje = (ipcObj ? parseFloat(ipcObj.valor) : 0) / 100;
+        const ivaPorcentaje = (ivaObj ? parseFloat(ivaObj.valor) : 0) / 100;
+        const ibuaPorcentaje = (ibuaObj ? parseFloat(ibuaObj.valor) : 0) / 100;
+        const ipcPorcentaje = (ipcObj ? parseFloat(ipcObj.valor) : 0) / 100;
 
-    const totalPorcentajeImpuestos = ivaPorcentaje + ibuaPorcentaje + ipcPorcentaje;
-    const divisor = 1 + totalPorcentajeImpuestos;
-    if (divisor === 0) return;
+        const totalPorcentajeImpuestos = ivaPorcentaje + ibuaPorcentaje + ipcPorcentaje;
+        const divisor = 1 + totalPorcentajeImpuestos;
+        if (divisor === 0) return;
 
-    // Función para redondear
-    const redondearPrecio = (precio) => {
-      if (precio < 100) {
-        return parseFloat(precio.toFixed(2));
-      }
-      return Math.round(precio / 100) * 100;
-    };
+        // Función para redondear
+        const redondearPrecio = (precio) => {
+            if (precio < 100) {
+                return parseFloat(precio.toFixed(2));
+            }
+            return Math.round(precio / 100) * 100;
+        };
 
-    const precioFinalRedondeado = redondearPrecio(nuevoVenta * divisor);
-    const nuevoPrecioBase = precioFinalRedondeado / divisor;
+        const precioFinalRedondeado = redondearPrecio(nuevoVenta * divisor);
+        const nuevoPrecioBase = precioFinalRedondeado / divisor;
 
-    const iva = nuevoPrecioBase * ivaPorcentaje;
-    const ibua = nuevoPrecioBase * ibuaPorcentaje;
-    const ipc = nuevoPrecioBase * ipcPorcentaje;
+        const iva = nuevoPrecioBase * ivaPorcentaje;
+        const ibua = nuevoPrecioBase * ibuaPorcentaje;
+        const ipc = nuevoPrecioBase * ipcPorcentaje;
 
-    txtregdata.value.precio_venta_ajustado = nuevoPrecioBase.toFixed(2);
-    txtregdata.value.iva_calculado = iva.toFixed(2);
-    txtregdata.value.ibua_calculado = ibua.toFixed(2);
-    txtregdata.value.ipc_calculado = ipc.toFixed(2);
+        txtregdata.value.precio_venta_ajustado = nuevoPrecioBase.toFixed(2);
+        txtregdata.value.iva_calculado = iva.toFixed(2);
+        txtregdata.value.ibua_calculado = ibua.toFixed(2);
+        txtregdata.value.ipc_calculado = ipc.toFixed(2);
 
-    precioventaimpuestos.value = precioFinalRedondeado;
-  },
-  { deep: true }
+        precioventaimpuestos.value = precioFinalRedondeado;
+    },
+    { deep: true }
 );
 
 

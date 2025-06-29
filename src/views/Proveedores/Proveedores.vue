@@ -1,7 +1,7 @@
 <template>
     <v-alert
         text="Cree proveedores y vinculelos a los productos para una mejor busqueda y orden de productos, antes de crear productos cree los proveedores"
-        title="Creación de Proveedores" type="info" icon="mdi-home-city"></v-alert>
+        title="Creación de Proveedores" type="primary" icon="mdi-home-city"></v-alert>
     <v-row class="bg-containerBg position-relative" no-gutters>
 
         <div class="text-center pa-4">
