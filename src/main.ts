@@ -36,6 +36,8 @@ const i18n = createI18n({
 
 
 const app = createApp(App);
+
+// 1. Registrar Plugins
 app.use(VueApexCharts);
 app.use(router);
 app.use(PerfectScrollbarPlugin);
@@ -44,13 +46,12 @@ app.use(VueTablerIcons);
 app.use(Antd);
 app.use(i18n);
 app.use(dateForm);
-app.use(vuetify).mount('#app');
+app.use(vuetify); // Registra vuetify pero NO montes todavía
 
+// 2. Registrar Directivas Personalizadas
 app.directive('solo-enteros', {
   mounted(el: HTMLElement) {
-    // Buscamos el input dentro del componente de Vuetify
     const input = el.tagName === 'INPUT' ? el : el.querySelector('input');
-    
     if (input) {
       input.addEventListener('keydown', (e: KeyboardEvent) => {
         const teclasProhibidas = ['.', ',', 'e', 'E', '+', '-'];
@@ -61,3 +62,6 @@ app.directive('solo-enteros', {
     }
   }
 });
+
+// 3. MONTAR (Siempre al final)
+app.mount('#app');

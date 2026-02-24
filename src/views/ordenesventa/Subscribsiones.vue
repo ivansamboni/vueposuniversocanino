@@ -29,7 +29,7 @@
                             <div class="font-weight-bold">{{ sub.client?.nombres }}</div>
                             <div class="text-caption text-grey">{{ sub.client?.numidentificacion }}</div>
                         </td>
-                        <td>{{ sub.pet?.name }}-ID{{ sub.pet?.identifier }}</td>
+                        <td>{{ sub.pet?.name }}</td>
                         <td>
                             <v-chip size="small" variant="outlined" color="primary" @click="">
                                 {{ sub.plan?.name }} 

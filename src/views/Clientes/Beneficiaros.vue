@@ -3,8 +3,8 @@
         <v-row dense class="mb-4">
             <v-col cols="12" md="8">
                 <v-text-field v-model="searchBenf" prepend-inner-icon="mdi-magnify"
-                    label="Buscar por nombre, identificación o dueño..." variant="solo" flat rounded="lg" hide-details
-                    clearable @keyup.enter="getPets()" />
+                    label="Buscar por nombre, identificación o dueño..." variant="solo" hide-details clearable
+                    @keyup.enter="getPets()" />
             </v-col>
             <v-col cols="12" md="4" class="d-flex ga-2">
                 <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="reload()" />
@@ -20,33 +20,105 @@
                         <v-row align="center" no-gutters>
                             <v-col cols="12" md="4" class="d-flex align-center">
                                 <v-dialog max-width="500">
+
                                     <template v-slot:activator="{ props: activatorProps }">
+
                                         <v-btn v-bind="activatorProps" variant="flat" icon="mdi-dog">
                                             <v-avatar size="60" class="mr-15">
-                                                <v-img v-if="cli.photo" :src="cli.photo" alt="Pet Photo" cover></v-img>
+                                                <v-img v-if="cli.photo" :src="`${url}${cli.photo}`" width="100%" />
                                                 <v-icon v-else icon="mdi-dog"></v-icon>
                                             </v-avatar>
                                         </v-btn>
                                     </template>
-
                                     <template v-slot:default="{ isActive }">
+
                                         <v-card :title="(cli.name)">
                                             <v-card-text>
-                                                <v-img v-if="cli.photo" :src="cli.photo" width="100%" />
+                                                <v-img v-if="cli.photo" :src="`${url}${cli.photo}`" width="100%" />
                                                 <v-icon v-else icon="mdi-dog" color="primary" size="32" />
                                             </v-card-text>
+
                                             <v-card-actions>
                                                 <v-spacer></v-spacer>
                                                 <v-btn text="X" @click="isActive.value = false"></v-btn>
                                             </v-card-actions>
                                         </v-card>
                                     </template>
+
                                 </v-dialog>
-                                <div>
-                                    <div class="text-h6 font-weight-bold">{{ cli.name }}</div>
-                                    <v-chip size="x-small" color="primary" variant="tonal" class="font-weight-bold">
-                                        {{ cli.identifier || 'SIN ID' }}
-                                    </v-chip>
+                                <p class="text-center pa-4"> {{ cli.name }}</p>
+
+                                <div class="text-center pa-4">
+                                    <v-btn @click="dialogQr = true" icon="mdi mdi-qrcode-scan">
+                                    </v-btn>
+                                    <v-dialog v-model="dialogQr" width="auto">
+                                        <v-card>
+                                            <div :id="'print-' + cli.id" class="pa-4">
+                                                <v-img :src="cli.identifier" width="400px" class="mx-auto" />
+                                                <h3 class="text-center" v-if="cli.name">{{ cli.name }}</h3>
+                                            </div>
+
+                                            <v-btn color="primary" class="ma-4" @click="imprimirQR(cli)">
+                                                Imprimir
+                                            </v-btn>
+
+                                            <template v-slot:actions>
+                                                <v-btn class="ms-auto" text="Cerrar" @click="dialogQr = false"></v-btn>
+                                            </template>
+                                        </v-card>
+                                    </v-dialog>
+                                </div>
+
+                                <div class="text-center pa-4">
+                                    <v-btn @click="dialogLog = true, getLogs(cli.id)" icon="mdi mdi-book-edit-outline">
+                                    </v-btn>
+                                    <v-dialog v-model="dialogLog" max-width="600px">
+                                        <v-card class="rounded-xl">
+                                            <v-card-title class="pa-4 d-flex align-center">
+                                                <v-icon icon="mdi-notebook" class="mr-2" />
+                                                Bitácora de Seguimiento
+                                            </v-card-title>
+
+                                            <v-card-text>
+                                                <v-row dense>
+                                                    <v-col cols="8">
+                                                        <v-text-field v-model="logForm.title" label="Título del reporte"
+                                                            density="compact" variant="outlined" />
+                                                    </v-col>
+                                                    <v-col cols="4">
+                                                        <v-select v-model="logForm.type" :items="logTypes" label="Tipo"
+                                                            density="compact" />
+                                                    </v-col>
+                                                    <v-col cols="12">
+                                                        <v-textarea v-model="logForm.description"
+                                                            label="Descripción detallada" rows="2" density="compact" />
+                                                    </v-col>
+                                                    <v-col cols="12">
+                                                        <v-btn block color="primary" @click="guardarLog()"
+                                                            :disabled="!logForm.title">Agregar
+                                                            Entrada</v-btn>
+                                                    </v-col>
+                                                </v-row>
+
+                                                <v-divider class="my-4"></v-divider>
+
+                                                <v-timeline density="compact" align="start">
+                                                    <v-timeline-item v-for="log in petLogs" :key="log.id"
+                                                        size="x-small">
+                                                        <div class="mb-4">
+                                                            <div class="d-flex justify-space-between align-center">
+                                                                <strong>{{ log.title }}</strong>
+                                                                <span class="text-caption grey--text">-{{ new
+                                                                    Date(log.created_at).toLocaleString()
+                                                                    }}</span>
+                                                            </div>
+                                                            <div class="text-body-2">{{ log.description }}</div>
+                                                        </div>
+                                                    </v-timeline-item>
+                                                </v-timeline>
+                                            </v-card-text>
+                                        </v-card>
+                                    </v-dialog>
                                 </div>
                             </v-col>
 
@@ -59,7 +131,7 @@
                                 <div class="text-caption text-grey">{{ cli.client.numidentificacion }}</div>
                             </v-col>
 
-                            <v-col cols="6" md="2" class="mt-2 mt-md-0">
+                            <v-col cols="12" md="2" class="mt-2 mt-md-0">
                                 <div class="text-caption text-grey">Raza / Tipo</div>
                                 <v-chip size="small" variant="outlined" color="grey-darken-2">{{ cli.type }}</v-chip>
                             </v-col>
@@ -83,7 +155,7 @@
         <v-row v-else justify="center" class="mt-10">
             <v-col cols="12" md="4" class="text-center">
                 <v-icon icon="mdi-paw-off" size="64" color="grey-lighten-1" />
-                <div class="text-h6 text-grey-darken-1 mt-4">No se encontraron mascotas</div>
+                <div class="text-h6 text-grey-darken-1 mt-4"></div>
                 <v-btn color="primary" variant="text" @click="reload()">Ver todos</v-btn>
             </v-col>
         </v-row>
@@ -139,13 +211,7 @@
                             <v-icon color="primary" class="mr-2">mdi-paw</v-icon>
                             <span class="text-subtitle-1 font-weight-bold">Datos de la Mascota</span>
                         </div>
-
                         <v-row dense>
-                            <v-col cols="12" md="6">
-                                <v-text-field v-model="txtregdata.identifier" label="Identificación / Chip"
-                                    variant="outlined" rounded="lg" color="primary"
-                                    prepend-inner-icon="mdi-tag-outline" />
-                            </v-col>
 
                             <v-col cols="12" md="6">
                                 <v-text-field v-model="txtregdata.name" :rules="nombreRules"
@@ -196,8 +262,6 @@
             </v-card>
         </v-dialog>
 
-
-
         <v-snackbar v-model="snackbarReg" :timeout="timeout">
             <h3 v-if="regerrormsg" class="text-error">{{ regerrormsg }}</h3>
             <h3 v-if="regsuccessmsg" class="text-success">{{ regsuccessmsg }}</h3>
@@ -217,6 +281,7 @@
             </template>
         </v-snackbar>
     </v-container>
+
 </template>
 
 
@@ -225,32 +290,41 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import axiosInst from '@/components/axiosins'
-import useRegister from '@/composables/useRegister'
-import useUpdate from '@/composables/useUpdate'
 import SearchComponent from '@/components/SearchComponent.vue'
 
-
-const { register, regsuccessmsg, regerrormsg } = useRegister();
-const { update, upderrormsg, updsuccessmsg } = useUpdate();
 const url = import.meta.env.VITE_APP_API_URL
 
 const txtregdata = ref({
     id: '', client_id: '', identifier: '', name: '', type: '', year_old: '', observations: '', photo: '',
     is_active: 1
 })
+
+const logForm = ref({
+    pet_id: null,
+    title: '',
+    description: '',
+    type: 'General'
+})
+const logTypes = ['Médico', 'Vacuna', 'Alimentación', 'Higiene', 'General']
 const petsList = ref({ data: [], last_page: 1 })
 const nombreRules = ref([(v) => !!v || 'El campo es requerido'])
-const emailRules = ref([(v) => !!v || 'El campo es requerido', (v) => /.+@.+\..+/.test(v) || 'E-mail debe ser valido']);
 const snackbarReg = ref(false)
 const snackbarUpd = ref(false)
 const timeout = 4000
 const dialogEdit = ref(false)
 const editando = ref(false);
+const dialogQr = ref(false)
+const dialogLog = ref(false)
 const search = ref('');
 const searchBenf = ref('');
 const clientResults = ref([]);
+const petLogs = ref([]);
 const page = ref(1)
 const fotoSeleccionada = ref(null);
+const regerrormsg = ref('')
+const regsuccessmsg = ref('')
+const upderrormsg = ref('')
+const updsuccessmsg = ref('')
 
 const handleFileUpload = (event) => {
     fotoSeleccionada.value = event.target.files[0]
@@ -260,6 +334,7 @@ const nuevoCliente = () => {
     editando.value = true;
     dialogEdit.value = true
     txtregdata.value.client_id = ''
+     txtregdata.value.id = ''
     txtregdata.value.identifier = ''
     txtregdata.value.name = ''
     txtregdata.value.type = ''
@@ -302,13 +377,14 @@ const registrar = async () => {
 
     // 4. Enviamos el formData en lugar del .value plano
     try {
-        await register(url + 'api/pet', formData);
-        // Limpieza y feedback
-        getPets();
-        dialogEdit.value = false;
+        await axiosInst.post(url + 'api/pet', formData);
         snackbarReg.value = true;
+        regsuccessmsg.value = 'Registro éxitoso'
+        regerrormsg.value = ''
+        dialogEdit.value = false;
         editando.value = true;
         txtregdata.value.client_id = ''
+        txtregdata.value.id = ''
         txtregdata.value.identifier = ''
         txtregdata.value.name = ''
         txtregdata.value.type = ''
@@ -316,9 +392,12 @@ const registrar = async () => {
         txtregdata.value.observations = ''
         txtregdata.value.photo = ''
         fotoSeleccionada.value = null; // Limpiar la foto para el siguiente registro
+        getPets();
     } catch (error) {
-        console.error("Error al registrar:", error);
+        regsuccessmsg.value = ''
+        regerrormsg.value = error.response.data.message
     }
+    snackbarReg.value = true
 }
 
 const actualizar = async () => {
@@ -347,9 +426,12 @@ const actualizar = async () => {
         });
 
         getPets();
-        dialogEdit.value = false;
         snackbarUpd.value = true;
+        updsuccessmsg.value = 'Se actualizó con éxito'
+        upderrormsg.value = ''
+        dialogEdit.value = false;
         fotoSeleccionada.value = null;
+        txtregdata.value.pet_id = ''
         txtregdata.value.client_id = ''
         txtregdata.value.identifier = ''
         txtregdata.value.name = ''
@@ -359,8 +441,10 @@ const actualizar = async () => {
         txtregdata.value.photo = ''
         fotoSeleccionada.value = null;
     } catch (error) {
-        console.error("Error al actualizar:", error);
+        updsuccessmsg.value = ''
+        upderrormsg.value = error.response.data.message
     }
+    snackbarUpd.value = true
 };
 
 const selecCliente = async (id) => {
@@ -392,6 +476,51 @@ const getPets = async () => {
     }
 }
 
+const getLogs = async (petId) => {
+    try {
+        // 1. Limpiamos la lista actual para que el usuario vea que está cargando
+        petLogs.value = [];
+
+        const res = await axiosInst.get(`${url}api/petlog`, {
+            params: { pet_id: petId }
+        });
+
+        console.log("Respuesta del servidor:", res.data);
+
+        // 2. ASIGNACIÓN CORRECTA:
+        // Si el controlador devuelve return response()->json($logs), 
+        // los datos están en res.data directamente.
+        petLogs.value = res.data;
+
+        // 3. Preparamos el formulario para una nueva entrada de ESTA mascota
+        logForm.value.pet_id = petId;
+
+        // ¡BORRÉ LA LÍNEA getLogs(petId)! (Causaba bucle infinito)
+
+    } catch (error) {
+        console.error("Error cargando logs", error);
+    }
+}
+
+const guardarLog = async () => {
+    try {
+        const response = await axiosInst.post(`${url}api/petlog`, logForm.value);
+        petLogs.value.unshift(response.data);
+
+        // Limpiar solo los textos, MANTENER el pet_id
+        const currentPetId = logForm.value.pet_id; // Guardamos el ID
+        logForm.value = {
+            pet_id: currentPetId, // Lo reasignamos
+            title: '',
+            description: '',
+            type: 'General'
+        };
+
+    } catch (error) {
+        alert("Error al guardar");
+    }
+}
+
 const deleteCliente = async (id) => {
     let confirmac = confirm('Eliminar?');
     if (confirmac) {
@@ -414,6 +543,53 @@ const reload = () => {
 onMounted(() => {
     getPets()
 })
+
+const imprimirQR = (cliente) => {
+    // 1. Creamos una ventana nueva (blank)
+    const ventana = window.open('', '_blank', 'height=600,width=800');
+
+    // 1. Escribimos el contenido
+    ventana.document.write(`
+    <html>
+      <head>
+        <title>Imprimir QR - ${cliente.name || ''}</title>
+        <style>
+          body { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 90vh; 
+            margin: 0; 
+            font-family: sans-serif;
+          }
+          img { width: 350px; height: auto; }
+          h2 { margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <img src="${cliente.identifier}" />
+        <h2>${cliente.name || ''}</h2>
+        <script>
+          window.onload = function() {
+            setTimeout(() => {
+              window.print();
+            }, 300); // Pequeña pausa para que Chrome procese la imagen
+          };
+          // Se cierra solo DESPUÉS de imprimir o cancelar
+          window.onafterprint = function() {
+            window.close();
+          };
+        <\/script>
+      </body>
+    </html>
+  `);
+
+    // 2. ¡ESTA LÍNEA ES CLAVE! 
+    // Le avisa al navegador que termine de cargar el documento.
+    ventana.document.close();
+}
+
 </script>
 <style lang="scss">
 .registerBox {
