@@ -129,6 +129,11 @@ const MainRoutes = {
       component: () => import('@/views/pages/Inautorized.vue')
     },
     {
+      name: 'index',
+      path: '/index',
+      component: () => import('@/views/pages/Index.vue')
+    },
+    {
       name: 'cuentasporpagar',
       path: '/cuentasporpagar',
       component: () => import('@/views/cuentasporpagar/Cuentasporpagar.vue')
