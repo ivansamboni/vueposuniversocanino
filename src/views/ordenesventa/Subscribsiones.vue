@@ -19,8 +19,7 @@
                         <th>Plan</th>
                         <th>Vigencia</th>
                         <th>Estado</th>
-                        <th>Pagado</th>
-                        <th class="text-right">Acciones</th>
+                        <th>Pagado</th>                        
                     </tr>
                 </thead>
                 <tbody>
@@ -49,17 +48,10 @@
                         </td>
                         <td class="font-weight-bold text-success">
                             ${{ Number(sub.amount_paid).toLocaleString('es-ES') }}
-                        </td>
-                        <td class="text-right">
-                            <v-btn v-if="sub.status === 'active'" icon="mdi-cancel" variant="text" color="error"
-                                size="small" @click="cancelSubscription(sub.id)" />
-                            <v-btn icon="mdi-refresh" variant="text" color="info" size="small" title="Renovar"
-                                @click="openRenewDialog(sub)" />
-                        </td>
+                        </td>                        
                     </tr>
                 </tbody>
             </v-table>
-
             <v-card-actions class="justify-center">
                 <v-pagination v-model="page" :length="subscriptions.last_page" @update:model-value="getSubscriptions" />
             </v-card-actions>

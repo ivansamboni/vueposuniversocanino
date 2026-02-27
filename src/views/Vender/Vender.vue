@@ -277,9 +277,9 @@
                 <v-form>
                     <v-row align="center">
                         <v-col cols="12" md="8">
-                            <v-combobox v-model="search" :items="clientResults" item-title="nombre" item-value="id"
-                                variant="outlined" v-model:search="buscarCliente"
-                                label="Buscar cliente por nombre o NIT" prepend-inner-icon="mdi-magnify" color="primary"
+                            <v-combobox v-model="clienteSeleccionado" v-model:search="buscarTexto"
+                                :items="clientResults" item-title="nombre" item-value="id" variant="outlined"
+                                label="Buscar cliente por nombre o CC" prepend-inner-icon="mdi-magnify" color="primary"
                                 hide-details rounded="lg" />
                         </v-col>
                         <v-col cols="12" md="4">
@@ -299,25 +299,28 @@
                                 <div class="d-flex align-center mb-2">
                                     <v-icon size="18" color="primary" class="me-2">mdi-account-outline</v-icon>
                                     <span class="text-body-2 font-weight-bold">NOMBRE:</span>
-                                    <span class="ms-2 text-body-2">{{ search.nombre || 'No seleccionado' }}</span>
+                                    <span class="ms-2 text-body-2">{{ clienteSeleccionado?.nombre || 'No seleccionado'
+                                        }}</span>
                                 </div>
                                 <div class="d-flex align-center mb-2">
                                     <v-icon size="18" color="primary"
                                         class="me-2">mdi-card-account-details-outline</v-icon>
                                     <span class="text-body-2 font-weight-bold">CC/NIT:</span>
-                                    <span class="ms-2 text-body-2">{{ search.numidentificacion || '-' }}</span>
+                                    <span class="ms-2 text-body-2">{{ clienteSeleccionado?.numidentificacion || '-'
+                                        }}</span>
                                 </div>
                             </v-col>
                             <v-col cols="12" md="5">
                                 <div class="d-flex align-center mb-2">
                                     <v-icon size="18" color="primary" class="me-2">mdi-phone-outline</v-icon>
                                     <span class="text-body-2 font-weight-bold">TEL:</span>
-                                    <span class="ms-2 text-body-2">{{ search.telefono || '-' }}</span>
+                                    <span class="ms-2 text-body-2">{{ clienteSeleccionado?.telefono || '-' }}</span>
                                 </div>
                                 <div class="d-flex align-center mb-2">
                                     <v-icon size="18" color="primary" class="me-2">mdi-email-outline</v-icon>
                                     <span class="text-body-2 font-weight-bold">EMAIL:</span>
-                                    <span class="ms-2 text-body-2 text-truncate">{{ search.email || '-' }}</span>
+                                    <span class="ms-2 text-body-2 text-truncate">{{ clienteSeleccionado?.email || '-'
+                                        }}</span>
                                 </div>
                             </v-col>
                             <v-col cols="12">
@@ -325,7 +328,7 @@
                                 <div class="d-flex align-start">
                                     <v-icon size="18" color="primary" class="me-2 mt-1">mdi-map-marker-outline</v-icon>
                                     <span class="text-body-2 font-weight-bold">DIRECCIÓN:</span>
-                                    <span class="ms-2 text-body-2">{{ search.ubicacion || '-' }}</span>
+                                    <span class="ms-2 text-body-2">{{ clienteSeleccionado?.ubicacion || '-' }}</span>
                                 </div>
                             </v-col>
                         </v-row>
@@ -333,7 +336,7 @@
 
                     <v-alert v-if="search.email" density="compact" type="info" variant="tonal" class="mt-4 text-caption"
                         icon="mdi-send-check">
-                        La factura se enviará al correo <strong>{{ search.email }}</strong>
+                        La factura se enviará al correo <strong>{{ clienteSeleccionado?.email || '-'}}</strong>
                     </v-alert>
                 </v-form>
             </v-card-text>
@@ -346,9 +349,9 @@
                     Usar Cliente General
                 </v-btn>
                 <v-spacer />
-                <v-btn color="primary" variant="elevated" :disabled="!search.numidentificacion"
+                <v-btn color="primary" variant="elevated" 
                     class="text-none px-6 rounded-lg"
-                    @click="clienteFinal(search.numidentificacion); dialogEdit = false">
+                    @click="clienteFinal(clienteSeleccionado.numidentificacion); dialogEdit = false">
                     <v-icon start>mdi-check-circle</v-icon>
                     Confirmar Cliente
                 </v-btn>
@@ -510,559 +513,564 @@
 </template>
 
 
-        <script setup>
-        // ===================== IMPORTS =====================
-        import { ref, onMounted, onUnmounted, onBeforeUnmount, computed, watch, nextTick, onBeforeUpdate, shallowRef } from 'vue'
-        import { useRouter } from 'vue-router'
-        import axiosInst from '@/components/axiosins'
-        import { useAuthStore } from '@/stores/auth'
-        import useRegister from '@/composables/useRegister'
-        import { CodigosDian } from '@/composables/CodigosDian'
-        import Clientes from '../Clientes/Clientes.vue'
+<script setup>
+// ===================== IMPORTS =====================
+import { ref, onMounted, onUnmounted, onBeforeUnmount, computed, watch, nextTick, onBeforeUpdate, shallowRef } from 'vue'
+import { useRouter } from 'vue-router'
+import axiosInst from '@/components/axiosins'
+import { useAuthStore } from '@/stores/auth'
+import useRegister from '@/composables/useRegister'
+import { CodigosDian } from '@/composables/CodigosDian'
+import Clientes from '../Clientes/Clientes.vue'
 
 
-        // ===================== SETUP =====================
-        const { metodosPago, formasPago } = CodigosDian()
-        const router = useRouter()
-        const authStore = useAuthStore()
-        const { register } = useRegister()
-        const url = import.meta.env.VITE_APP_API_URL
+// ===================== SETUP =====================
+const { metodosPago, formasPago } = CodigosDian()
+const router = useRouter()
+const authStore = useAuthStore()
+const { register } = useRegister()
+const url = import.meta.env.VITE_APP_API_URL
 
 
-        // ===================== ESTADO DE UI =====================
-        const dialog = shallowRef(false)
-        const dialog2 = shallowRef(false)
-        const dialogEdit = ref(false)
-        const dialogAddclient = ref(false)
-        const dialogImp = ref(false)
-        const snackbarReg = ref(false)
-        const snackbarError = ref(false)
-        const cardPlanSelected = ref(false)
-        const spinner = ref(false)
-        const activeImpresion = ref(true)
-        const pdfUrl = ref('')
-        const cajaMensajeEstado = ref({ message: '', status: '' })
-        const regerrormsg = ref('')
+// ===================== ESTADO DE UI =====================
+const dialog = shallowRef(false)
+const dialog2 = shallowRef(false)
+const dialogEdit = ref(false)
+const dialogAddclient = ref(false)
+const dialogImp = ref(false)
+const snackbarReg = ref(false)
+const snackbarError = ref(false)
+const cardPlanSelected = ref(false)
+const spinner = ref(false)
+const activeImpresion = ref(true)
+const pdfUrl = ref('')
+const cajaMensajeEstado = ref({ message: '', status: '' })
+const regerrormsg = ref('')
 
-        // ===================== REFERENCIAS DOM =====================
-        const codigoBarrasInput = ref(null)
-        const clientesRef = ref(null)
-        const inputRefs = ref([])
-        const focusedIndex = ref(null)
-
-
-        // ===================== BÚSQUEDA =====================
-        const search = ref('')
-        const buscarCliente = ref('')      // watch separado del input del combobox
-        const nomBuscar = ref('')
-        const selectedId = ref('')
-        const clientResults = ref([])
-        const productResults = ref([])
+// ===================== REFERENCIAS DOM =====================
+const codigoBarrasInput = ref(null)
+const clientesRef = ref(null)
+const inputRefs = ref([])
+const focusedIndex = ref(null)
 
 
-        // ===================== VENTA =====================
-        const cedula = ref('222222222222')
-        const itemsVenta = ref([])
-        const pets = ref([])
-
-        const datosVenta = ref({
-            cliente_id: '',
-            pet_id: '',
-            petname: '',
-            plan_id: '',
-            user_id: authStore.user.id,
-            nombres: '',
-            numidentificacion: '',
-            forma_pago: '1',   // 1 = contado | 2 = crédito
-            metodo_pago: '10',  // efectivo por defecto
-            total: 0,
-        })
-
-        const txtregdata = ref({
-            cajero_id: authStore.user.id,
-            id: '',
-            nombre: '',
-            unidad_medida: '',
-            precio_venta: '',
-            precio_final: '',
-            cantidad: 1,
-            stock: '',
-            codigo_barras: '',
-            img1: '',
-        })
-
-        const dataPlan = ref({
-            id: '',
-            name: '',
-            description: '',
-            price: '',
-            days_per_week: '',
-            duration_days: '',
-            is_active: true,
-        })
-
-        const plansList = ref({
-            current_page: 1,
-            data: [],
-            last_page: 1,
-            next_page_url: null,
-            prev_page_url: null,
-        })
+// ===================== BÚSQUEDA =====================
+const search = ref('')
+const buscarCliente = ref('')
+const clienteSeleccionado = ref(null)     // watch separado del input del combobox
+const nomBuscar = ref('')
+const selectedId = ref('')
+const clientResults = ref([])
+const productResults = ref([])
+const buscarTexto = ref('')
 
 
-        // ===================== EFECTIVO =====================
-        const efectivoRecibido = ref('')
+// ===================== VENTA =====================
+const cedula = ref('222222222222')
+const itemsVenta = ref([])
+const pets = ref([])
 
-        const efectivoRecibidoFormatted = computed(() =>
-            efectivoRecibido.value.toLocaleString('es-CO')
+const datosVenta = ref({
+    cliente_id: '',
+    pet_id: '',
+    petname: '',
+    plan_id: '',
+    user_id: authStore.user.id,
+    nombres: '',
+    numidentificacion: '',
+    forma_pago: '1',   // 1 = contado | 2 = crédito
+    metodo_pago: '10',  // efectivo por defecto
+    total: 0,
+})
+
+const txtregdata = ref({
+    cajero_id: authStore.user.id,
+    id: '',
+    nombre: '',
+    unidad_medida: '',
+    precio_venta: '',
+    precio_final: '',
+    cantidad: 1,
+    stock: '',
+    codigo_barras: '',
+    img1: '',
+})
+
+const dataPlan = ref({
+    id: '',
+    name: '',
+    description: '',
+    price: '',
+    days_per_week: '',
+    duration_days: '',
+    is_active: true,
+})
+
+const plansList = ref({
+    current_page: 1,
+    data: [],
+    last_page: 1,
+    next_page_url: null,
+    prev_page_url: null,
+})
+
+
+// ===================== EFECTIVO =====================
+const efectivoRecibido = ref('')
+
+const efectivoRecibidoFormatted = computed(() =>
+    efectivoRecibido.value.toLocaleString('es-CO')
+)
+
+const updateEfectivoRecibido = (event) => {
+    const value = event.target.value.replace(/\D/g, '')
+    efectivoRecibido.value = Number(value)
+}
+
+// ===================== COMPUTED =====================
+const total = computed(() => {
+
+    const totalProductos = itemsVenta.value.reduce((acc, p) => acc + p.precio_final * p.cantidad, 0)
+
+    const precioPlan = dataPlan.value && dataPlan.value.price ? parseFloat(dataPlan.value.price) : 0
+
+    return totalProductos + precioPlan
+})
+
+const totalDevolver = computed(() =>
+    efectivoRecibido.value - total.value
+)
+
+const mensajeDevolver = computed(() => {
+    const fmt = Math.abs(totalDevolver.value).toLocaleString('es-CO')
+    return totalDevolver.value >= 0 ? `Devolver: $${fmt}` : `Debe: $${fmt}`
+})
+
+const colorMensaje = computed(() =>
+    totalDevolver.value >= 0 ? 'text-success' : 'text-error'
+)
+
+const isDisabled = computed(() => {
+    if (!datosVenta.value.cliente_id) return true
+    if (datosVenta.value.forma_pago === '1' && !datosVenta.value.metodo_pago) return true
+    const tieneProductos = itemsVenta.value.length > 0
+    const tienePlan = !!datosVenta.value.plan_id
+    if (!tieneProductos && !tienePlan) return true
+    if (tieneProductos) {
+        const cantidadesInvalidas = itemsVenta.value.some(item =>
+            item.cantidad === null || Number(item.cantidad) <= 0
+        )
+        if (cantidadesInvalidas) return true
+    }
+
+    return false
+})
+
+
+// ===================== LOCAL STORAGE =====================
+const loadStorageList = () => {
+    const stored = JSON.parse(localStorage.getItem('listaProductos'))
+    if (stored) itemsVenta.value = stored
+}
+
+const saveToLocalStorage = () => {
+    localStorage.setItem('listaProductos', JSON.stringify(itemsVenta.value))
+}
+
+
+// ===================== API: CAJA =====================
+const validarAperturaCaja = async () => {
+    const res = await axiosInst.get(`${url}api/validarcaja/${txtregdata.value.cajero_id}`)
+    cajaMensajeEstado.value.message = res.data.message
+    cajaMensajeEstado.value.status = res.data.status
+}
+
+
+// ===================== API: PRODUCTOS =====================
+const searchProducto = async () => {
+    try {
+        const res = await axiosInst.get(`${url}api/searchnomproducto/${nomBuscar.value}`)
+        productResults.value = res.data.map(p => ({
+            codigo_barras: p.codigo_barras,
+            nombre: p.nombre
+                + (p.unidad_medida ? ' ' + p.unidad_medida : '')
+                + (p.precio_final ? ' $ ' + p.precio_final : '')
+        }))
+    } catch { /* silencioso */ }
+}
+
+const searchCodigo = async () => {
+    try {
+        const res = await axiosInst.get(`${url}api/searchcodigoproducto/${txtregdata.value.codigo_barras}`)
+
+        if (res.data.stock === 0) {
+            alert('Alerta: Producto agotado en el sistema. Actualice stock en la opción de ajustes.')
+        }
+
+        const index = itemsVenta.value.findIndex(
+            item => item.id === res.data.id || item.codigo_barras === txtregdata.value.codigo_barras
         )
 
-        const updateEfectivoRecibido = (event) => {
-            const value = event.target.value.replace(/\D/g, '')
-            efectivoRecibido.value = Number(value)
-        }
-
-        // ===================== COMPUTED =====================
-        const total = computed(() => {
-
-            const totalProductos = itemsVenta.value.reduce((acc, p) => acc + p.precio_final * p.cantidad, 0)
-
-            const precioPlan = dataPlan.value && dataPlan.value.price ? parseFloat(dataPlan.value.price) : 0
-
-            return totalProductos + precioPlan
-        })
-
-        const totalDevolver = computed(() =>
-            efectivoRecibido.value - total.value
-        )
-
-        const mensajeDevolver = computed(() => {
-            const fmt = Math.abs(totalDevolver.value).toLocaleString('es-CO')
-            return totalDevolver.value >= 0 ? `Devolver: $${fmt}` : `Debe: $${fmt}`
-        })
-
-        const colorMensaje = computed(() =>
-            totalDevolver.value >= 0 ? 'text-success' : 'text-error'
-        )
-
-        const isDisabled = computed(() => {
-            if (!datosVenta.value.cliente_id) return true
-            if (datosVenta.value.forma_pago === '1' && !datosVenta.value.metodo_pago) return true
-            const tieneProductos = itemsVenta.value.length > 0
-            const tienePlan = !!datosVenta.value.plan_id
-            if (!tieneProductos && !tienePlan) return true
-            if (tieneProductos) {
-                const cantidadesInvalidas = itemsVenta.value.some(item =>
-                    item.cantidad === null || Number(item.cantidad) <= 0
-                )
-                if (cantidadesInvalidas) return true
-            }
-
-            return false
-        })
-
-
-        // ===================== LOCAL STORAGE =====================
-        const loadStorageList = () => {
-            const stored = JSON.parse(localStorage.getItem('listaProductos'))
-            if (stored) itemsVenta.value = stored
-        }
-
-        const saveToLocalStorage = () => {
-            localStorage.setItem('listaProductos', JSON.stringify(itemsVenta.value))
-        }
-
-
-        // ===================== API: CAJA =====================
-        const validarAperturaCaja = async () => {
-            const res = await axiosInst.get(`${url}api/validarcaja/${txtregdata.value.cajero_id}`)
-            cajaMensajeEstado.value.message = res.data.message
-            cajaMensajeEstado.value.status = res.data.status
-        }
-
-
-        // ===================== API: PRODUCTOS =====================
-        const searchProducto = async () => {
-            try {
-                const res = await axiosInst.get(`${url}api/searchnomproducto/${nomBuscar.value}`)
-                productResults.value = res.data.map(p => ({
-                    codigo_barras: p.codigo_barras,
-                    nombre: p.nombre
-                        + (p.unidad_medida ? ' ' + p.unidad_medida : '')
-                        + (p.precio_final ? ' $ ' + p.precio_final : '')
-                }))
-            } catch { /* silencioso */ }
-        }
-
-        const searchCodigo = async () => {
-            try {
-                const res = await axiosInst.get(`${url}api/searchcodigoproducto/${txtregdata.value.codigo_barras}`)
-
-                if (res.data.stock === 0) {
-                    alert('Alerta: Producto agotado en el sistema. Actualice stock en la opción de ajustes.')
-                }
-
-                const index = itemsVenta.value.findIndex(
-                    item => item.id === res.data.id || item.codigo_barras === txtregdata.value.codigo_barras
-                )
-
-                if (index !== -1) {
-                    itemsVenta.value[index].cantidad += txtregdata.value.cantidad
-                    const item = itemsVenta.value.splice(index, 1)[0]
-                    itemsVenta.value.unshift(item)
-                } else {
-                    itemsVenta.value.unshift({
-                        id: res.data.id,
-                        nombre: res.data.nombre,
-                        unidad_medida: res.data.unidad_medida,
-                        precio_venta: res.data.precio_venta,
-                        precio_final: res.data.precio_final,
-                        stock: res.data.stock,
-                        cantidad: txtregdata.value.cantidad,
-                        codigo_barras: txtregdata.value.codigo_barras,
-                    })
-                }
-
-                saveToLocalStorage()
-
-                // Reset campos
-                txtregdata.value.cantidad = 1
-                txtregdata.value.codigo_barras = ''
-                selectedId.value = ''
-                productResults.value = []
-                codigoBarrasInput.value.focus()
-
-            } catch {
-                alert('Código no encontrado')
-                txtregdata.value.codigo_barras = ''
-            }
-        }
-
-
-        // ===================== API: CLIENTES =====================
-        const searchCliente = async () => {
-            try {
-                const res = await axiosInst.post(`${url}api/clientesearch`, { search: search.value })
-                clientResults.value = res.data.data.map(c => ({
-                    id: c.id,
-                    numidentificacion: c.numidentificacion,
-                    nombre: `${c.nombres} ${c.apellidos ?? ''}`,
-                    email: c.email,
-                    telefono: c.telefono,
-                    ubicacion: c.ubicacion || '',
-                }))
-            } catch (error) {
-                console.error('Error al obtener los clientes', error)
-            }
-        }
-
-        const clienteFinal = async (cedula) => {
-            const payload = {
-                tipoidentificacion: 'CÉDULA DE CIUDADANÍA',
-                numidentificacion: cedula,
-                nombres: 'CONSUMIDOR',
-                apellidos: 'FINAL',
-            }
-
-            try {
-                let res
-                try {
-                    res = await axiosInst.get(`${url}api/clientefinal/${cedula}`)
-                } catch (error) {
-                    if (error.response?.status === 404) {
-                        await register(`${url}api/clientes`, payload)
-                        res = await axiosInst.get(`${url}api/clientefinal/${cedula}`)
-                    } else {
-                        throw error
-                    }
-                }
-
-                pets.value = res.data.pets
-                datosVenta.value.cliente_id = res.data.id
-                datosVenta.value.numidentificacion = res.data.numidentificacion
-                datosVenta.value.nombres = `${res.data.nombres} ${res.data.apellidos}`
-                search.value = []
-
-            } catch {
-                alert('Error procesando el cliente final. Redirigiendo al módulo de clientes.')
-                router.push('/clientes')
-            }
-        }
-
-
-        // ===================== API: PLANES =====================
-        const getPlans = async (urls = `${url}api/planes?page=1`) => {
-            try {
-                const res = await axiosInst.get(urls)
-                plansList.value = res.data
-            } catch { /* silencioso */ }
-        }
-
-        const selecPlan = async (id) => {
-            const res = await axiosInst.get(`${url}api/planes/${id}`)
-            dataPlan.value = res.data
-            datosVenta.value.plan_id = res.data.id
-        }
-
-        const actualizarNombreMascota = (idSeleccionado) => {
-            const mascota = pets.value.find(pet => pet.id === idSeleccionado)
-            datosVenta.value.petname = mascota ? mascota.name : ''
-            dialog2.value = false
-            dialog.value = false
-        }
-
-        const confirmarPlan = () => {
-            dialog2.value = false
-            dialog.value = false
-            cardPlanSelected.value = true
-        }
-
-        const cancelPlan = async () => {
-            cardPlanSelected.value = false
-            dataPlan.value.id = ''
-            dataPlan.value.price = ''
-            dataPlan.value.name = ''
-            datosVenta.value.plan_id = ''
-            datosVenta.value.pet_id = ''
-        }
-
-
-        const getPetHint = (id) => {
-            if (!id) return 'Selecciona a quién se le asignará el plan'
-            cardPlanSelected.value = true
-            const pet = pets.value.find(p => p.id === id)
-            return pet ? `Tipo: ${pet.type}` : ''
-        }
-
-
-        // ===================== VENTA =====================
-        const finishSale = async () => {
-            if (!window.confirm('¿Realizar Venta?')) return
-
-            spinner.value = true
-            try {
-                const payload = {
-                    cliente_id: datosVenta.value.cliente_id,
-                    pet_id: datosVenta.value.pet_id,
-                    plan_id: datosVenta.value.plan_id,
-                    forma_pago: datosVenta.value.forma_pago,
-                    metodo_pago: datosVenta.value.metodo_pago,
-                    total: total.value,
-                    items: itemsVenta.value,
-                }
-
-                const res = await axiosInst.post(`${url}api/vender`, payload)
-
-                if (activeImpresion.value) {
-                    pdfUrl.value = res.data.ticket_url
-                    dialogImp.value = true
-                } else {
-                    dialogImp.value = false
-                    pdfUrl.value = null
-                }
-
-                // Reset estado post-venta
-                efectivoRecibido.value = ''
-                itemsVenta.value = []
-                datosVenta.value.forma_pago = '1'
-                datosVenta.value.cliente_id = ''
-                datosVenta.value.plan_id = ''
-                datosVenta.value.pet_id = ''
-                saveToLocalStorage()
-                clienteFinal(cedula.value)
-                snackbarReg.value = true
-                cancelPlan()
-                codigoBarrasInput?.value?.focus?.()
-
-            } catch (error) {
-                regerrormsg.value = error.response.data.message
-                snackbarError.value = true
-            } finally {
-                spinner.value = false
-            }
-        }
-
-
-        // ===================== ITEMS =====================
-        const deleteItem = (id) => {
-            const index = itemsVenta.value.findIndex(item => item.id === id)
-            if (index !== -1) {
-                itemsVenta.value.splice(index, 1)
-                saveToLocalStorage()
-            }
-            codigoBarrasInput.value.focus()
-        }
-
-        const deleteItemAll = () => {
-            if (!window.confirm('¿Quitar todos los productos de la lista?')) return
-            itemsVenta.value = []
-            saveToLocalStorage()
-            codigoBarrasInput?.value?.focus?.()
-        }
-
-
-        // ===================== FOCO Y ATAJOS =====================
-        const focusSpecificInput = (index) => {
-            focusedIndex.value = index
-            nextTick(() => {
-                const component = inputRefs.value[index]
-                if (component) {
-                    component.focus()
-                    const el = component.$el.querySelector('input')
-                    if (el) el.select()
-                }
+        if (index !== -1) {
+            itemsVenta.value[index].cantidad += txtregdata.value.cantidad
+            const item = itemsVenta.value.splice(index, 1)[0]
+            itemsVenta.value.unshift(item)
+        } else {
+            itemsVenta.value.unshift({
+                id: res.data.id,
+                nombre: res.data.nombre,
+                unidad_medida: res.data.unidad_medida,
+                precio_venta: res.data.precio_venta,
+                precio_final: res.data.precio_final,
+                stock: res.data.stock,
+                cantidad: txtregdata.value.cantidad,
+                codigo_barras: txtregdata.value.codigo_barras,
             })
         }
 
-        const ponerFoco = () => {
-            codigoBarrasInput.value?.focus()
+        saveToLocalStorage()
+
+        // Reset campos
+        txtregdata.value.cantidad = 1
+        txtregdata.value.codigo_barras = ''
+        selectedId.value = ''
+        productResults.value = []
+        codigoBarrasInput.value.focus()
+
+    } catch {
+        alert('Código no encontrado')
+        txtregdata.value.codigo_barras = ''
+    }
+}
+
+
+// ===================== API: CLIENTES =====================
+const searchCliente = async (val) => {
+    if (!val || val.length < 3) return
+    try {
+        // Enviamos 'val' directamente
+        const res = await axiosInst.post(`${url}api/clientesearch`, { search: val })
+        clientResults.value = res.data.data.map(c => ({
+            id: c.id,
+            nombre: `${c.nombres} ${c.apellidos ?? ''}`,
+            numidentificacion:c.numidentificacion,
+            telefono: c.telefono,
+            email: c.email,
+            ubicacion: c.ubicacion,
+            email: c.email,
+        }))
+    } catch (error) {
+        console.error('Error al obtener los clientes', error)
+    }
+}
+
+const clienteFinal = async (cedula) => {
+    const payload = {
+        tipoidentificacion: 'CÉDULA DE CIUDADANÍA',
+        numidentificacion: cedula,
+        nombres: 'CONSUMIDOR',
+        apellidos: 'FINAL',
+    }
+
+    try {
+        let res
+        try {
+            res = await axiosInst.get(`${url}api/clientefinal/${cedula}`)
+        } catch (error) {
+            if (error.response?.status === 404) {
+                await register(`${url}api/clientes`, payload)
+                res = await axiosInst.get(`${url}api/clientefinal/${cedula}`)
+            } else {
+                throw error
+            }
         }
 
-        let timerInactividad = null
+        pets.value = res.data.pets
+        datosVenta.value.cliente_id = res.data.id
+        datosVenta.value.numidentificacion = res.data.numidentificacion
+        datosVenta.value.nombres = `${res.data.nombres} ${res.data.apellidos}`
+        search.value = []
 
-        const resetTimer = () => {
-            clearTimeout(timerInactividad)
-            timerInactividad = setTimeout(ponerFoco, 10000)
+    } catch {
+        alert('Error procesando el cliente final. Redirigiendo al módulo de clientes.')
+        router.push('/clientes')
+    }
+}
+
+
+// ===================== API: PLANES =====================
+const getPlans = async (urls = `${url}api/planes?page=1`) => {
+    try {
+        const res = await axiosInst.get(urls)
+        plansList.value = res.data
+    } catch { /* silencioso */ }
+}
+
+const selecPlan = async (id) => {
+    const res = await axiosInst.get(`${url}api/planes/${id}`)
+    dataPlan.value = res.data
+    datosVenta.value.plan_id = res.data.id
+}
+
+const actualizarNombreMascota = (idSeleccionado) => {
+    const mascota = pets.value.find(pet => pet.id === idSeleccionado)
+    datosVenta.value.petname = mascota ? mascota.name : ''
+    dialog2.value = false
+    dialog.value = false
+}
+
+const confirmarPlan = () => {
+    dialog2.value = false
+    dialog.value = false
+    cardPlanSelected.value = true
+}
+
+const cancelPlan = async () => {
+    cardPlanSelected.value = false
+    dataPlan.value.id = ''
+    dataPlan.value.price = ''
+    dataPlan.value.name = ''
+    datosVenta.value.plan_id = ''
+    datosVenta.value.pet_id = ''
+}
+
+
+const getPetHint = (id) => {
+    if (!id) return 'Selecciona a quién se le asignará el plan'
+    cardPlanSelected.value = true
+    const pet = pets.value.find(p => p.id === id)
+    return pet ? `Tipo: ${pet.type}` : ''
+}
+
+
+// ===================== VENTA =====================
+const finishSale = async () => {
+    if (!window.confirm('¿Realizar Venta?')) return
+
+    spinner.value = true
+    try {
+        const payload = {
+            cliente_id: datosVenta.value.cliente_id,
+            pet_id: datosVenta.value.pet_id,
+            plan_id: datosVenta.value.plan_id,
+            forma_pago: datosVenta.value.forma_pago,
+            metodo_pago: datosVenta.value.metodo_pago,
+            total: total.value,
+            items: itemsVenta.value,
         }
 
-        const handleShortcuts = (e) => {
-            if (e.ctrlKey && e.key.toLowerCase() === 'c') {
-                e.preventDefault()
-                codigoBarrasInput.value.focus()
-                return
-            }
+        const res = await axiosInst.post(`${url}api/vender`, payload)
 
-            if (e.key === 'F2' || e.key === 'F1') {
-                e.preventDefault()
-                if (itemsVenta.value.length > 0) focusSpecificInput(0)
-                return
-            }
-
-            if (isDisabled.value) return
-
-            if (e.ctrlKey && e.code === 'F9') {
-                e.preventDefault()
-                finishSale()
-            }
+        if (activeImpresion.value) {
+            pdfUrl.value = res.data.ticket_url
+            dialogImp.value = true
+        } else {
+            dialogImp.value = false
+            pdfUrl.value = null
         }
 
+        // Reset estado post-venta
+        efectivoRecibido.value = ''
+        itemsVenta.value = []
+        datosVenta.value.forma_pago = '1'
+        datosVenta.value.cliente_id = ''
+        datosVenta.value.plan_id = ''
+        datosVenta.value.pet_id = ''
+        saveToLocalStorage()
+        clienteFinal(cedula.value)
+        snackbarReg.value = true
+        cancelPlan()
+        codigoBarrasInput?.value?.focus?.()
 
-        // ===================== WATCHERS =====================
-        watch(nomBuscar, () => {
-            if (nomBuscar.value.length >= 3) searchProducto()
-        })
-
-        watch(selectedId, (newVal) => {
-            if (newVal?.codigo_barras) {
-                txtregdata.value.codigo_barras = newVal.codigo_barras.toString().trim()
-                if (txtregdata.value.codigo_barras.length > 0) searchCodigo()
-            }
-        })
-
-        watch(search, () => {
-            if (search.value.length >= 3) searchCliente()
-        })
-
-        watch(
-            () => datosVenta.value.forma_pago,
-            (val) => {
-                if (val === '2') {
-                    datosVenta.value.metodo_pago = null
-                    efectivoRecibido.value = 0
-                    dialogEdit.value = true
-                } else {
-                    datosVenta.value.metodo_pago = '10'
-                }
-            }
-        )
-
-        watch(dialogAddclient, async (value) => {
-            if (value) {
-                await nextTick()
-                clientesRef.value?.nuevoCliente?.()
-            }
-        })
+    } catch (error) {
+        regerrormsg.value = error.response.data.message
+        snackbarError.value = true
+    } finally {
+        spinner.value = false
+    }
+}
 
 
-        // ===================== CICLO DE VIDA =====================
-        onMounted(() => {
-            codigoBarrasInput.value.focus()
-            loadStorageList()
-            clienteFinal(cedula.value)
-            getPlans()
-            validarAperturaCaja()
+// ===================== ITEMS =====================
+const deleteItem = (id) => {
+    const index = itemsVenta.value.findIndex(item => item.id === id)
+    if (index !== -1) {
+        itemsVenta.value.splice(index, 1)
+        saveToLocalStorage()
+    }
+    codigoBarrasInput.value.focus()
+}
 
-            window.addEventListener('keydown', handleShortcuts)
-            window.addEventListener('mousemove', resetTimer)
-            window.addEventListener('keydown', resetTimer)
-            window.addEventListener('click', resetTimer)
-            window.addEventListener('scroll', resetTimer)
-            resetTimer()
-        })
+const deleteItemAll = () => {
+    if (!window.confirm('¿Quitar todos los productos de la lista?')) return
+    itemsVenta.value = []
+    saveToLocalStorage()
+    codigoBarrasInput?.value?.focus?.()
+}
 
-        onUnmounted(() => {
-            window.removeEventListener('mousemove', resetTimer)
-            window.removeEventListener('keydown', resetTimer)
-            window.removeEventListener('click', resetTimer)
-            window.removeEventListener('scroll', resetTimer)
-            clearTimeout(timerInactividad)
-        })
 
-        onBeforeUnmount(() => {
-            window.removeEventListener('keydown', handleShortcuts)
-        })
+// ===================== FOCO Y ATAJOS =====================
+const focusSpecificInput = (index) => {
+    focusedIndex.value = index
+    nextTick(() => {
+        const component = inputRefs.value[index]
+        if (component) {
+            component.focus()
+            const el = component.$el.querySelector('input')
+            if (el) el.select()
+        }
+    })
+}
 
-        onBeforeUpdate(() => {
-            inputRefs.value = []
-        })
+const ponerFoco = () => {
+    codigoBarrasInput.value?.focus()
+}
+
+let timerInactividad = null
+
+const resetTimer = () => {
+    clearTimeout(timerInactividad)
+    timerInactividad = setTimeout(ponerFoco, 10000)
+}
+
+const handleShortcuts = (e) => {
+    if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault()
+        codigoBarrasInput.value.focus()
+        return
+    }
+
+    if (e.key === 'F2' || e.key === 'F1') {
+        e.preventDefault()
+        if (itemsVenta.value.length > 0) focusSpecificInput(0)
+        return
+    }
+
+    if (isDisabled.value) return
+
+    if (e.ctrlKey && e.code === 'F9') {
+        e.preventDefault()
+        finishSale()
+    }
+}
+
+
+// ===================== WATCHERS =====================
+watch(nomBuscar, () => {
+    if (nomBuscar.value.length >= 3) searchProducto()
+})
+
+watch(selectedId, (newVal) => {
+    if (newVal?.codigo_barras) {
+        txtregdata.value.codigo_barras = newVal.codigo_barras.toString().trim()
+        if (txtregdata.value.codigo_barras.length > 0) searchCodigo()
+    }
+})
+
+watch(buscarTexto, (nuevoValor) => {
+    searchCliente(nuevoValor)
+})
+
+watch(
+    () => datosVenta.value.forma_pago,
+    (val) => {
+        if (val === '2') {
+            datosVenta.value.metodo_pago = null
+            efectivoRecibido.value = 0
+            dialogEdit.value = true
+        } else {
+            datosVenta.value.metodo_pago = '10'
+        }
+    }
+)
+
+watch(dialogAddclient, async (value) => {
+    if (value) {
+        await nextTick()
+        clientesRef.value?.nuevoCliente?.()
+    }
+})
+
+
+// ===================== CICLO DE VIDA =====================
+onMounted(() => {
+    codigoBarrasInput.value.focus()
+    loadStorageList()
+    clienteFinal(cedula.value)
+    getPlans()
+    validarAperturaCaja()
+
+    window.addEventListener('keydown', handleShortcuts)
+    window.addEventListener('mousemove', resetTimer)
+    window.addEventListener('keydown', resetTimer)
+    window.addEventListener('click', resetTimer)
+    window.addEventListener('scroll', resetTimer)
+    resetTimer()
+})
+
+onUnmounted(() => {
+    window.removeEventListener('mousemove', resetTimer)
+    window.removeEventListener('keydown', resetTimer)
+    window.removeEventListener('click', resetTimer)
+    window.removeEventListener('scroll', resetTimer)
+    clearTimeout(timerInactividad)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleShortcuts)
+})
+
+onBeforeUpdate(() => {
+    inputRefs.value = []
+})
 
 </script>
 
 
-        <style lang="scss">
-        .main-pos-container {
-            height: 100vh !important;
-            max-height: 90vh !important;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+<style lang="scss">
+.main-pos-container {
+    height: 100vh !important;
+    max-height: 90vh !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
-        .fill-height-custom {
-            height: 100%;
-        }
+.fill-height-custom {
+    height: 100%;
+}
 
-        .table-responsive {
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
+.table-responsive {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 
-        .flex-none {
-            flex: none;
-        }
+.flex-none {
+    flex: none;
+}
 
-        .custom-qty :deep(input) {
-            text-align: center;
-            font-weight: bold;
-        }
+.custom-qty :deep(input) {
+    text-align: center;
+    font-weight: bold;
+}
 
-        .border-primary {
-            border-top: 6px solid #1867c0 !important;
-        }
+.border-primary {
+    border-top: 6px solid #1867c0 !important;
+}
 
-        .footer-pago {
-            background: white !important;
-            position: relative;
-            width: 100%;
-            z-index: 10;
-            flex-shrink: 0;
-        }
+.footer-pago {
+    background: white !important;
+    position: relative;
+    width: 100%;
+    z-index: 10;
+    flex-shrink: 0;
+}
 
-        .lh-1 {
-            line-height: 1.1;
-        }
+.lh-1 {
+    line-height: 1.1;
+}
 
-        .tabla-pos :deep(td) {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
-        }
-    </style>
+.tabla-pos :deep(td) {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+</style>

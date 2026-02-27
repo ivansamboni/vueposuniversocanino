@@ -102,8 +102,7 @@
               <v-sheet rounded class="pa-4 blue lighten-5">
                 <v-row>
                   <v-col cols="6">
-                    <p><strong>Nombre:</strong> {{ orderDetail.client?.nombres ?? '' }} {{
-                      orderDetail.client?.apellidos
+                    <p><strong>Nombre:</strong> {{ orderDetail.client?.nombres ?? '' }} {{ orderDetail.client?.apellidos
                       ?? '' }}</p>
                     <p><strong>CC/NIT:</strong> {{ orderDetail.client?.numidentificacion ?? '' }}</p>
                     <p><strong>Tel:</strong> {{ orderDetail.client?.telefono ?? '' }}</p>
@@ -121,38 +120,65 @@
           <v-simple-table class="mt-6" dense>
             <thead class="blue darken-3 white--text">
               <tr>
-                <th class="text-left">Producto</th>
-                <th class="text-right">Cant</th>
-                <th class="text-right">Precio Unitario</th>
-                <th class="text-right">IVA</th>
-                <th class="text-right">IBUA</th>
-                <th class="text-right">IPC</th>
-                <th class="text-right">Subtotal</th>
+                <th class="text-left white--text">Código</th>
+                <th class="text-left white--text">Producto / Plan</th>
+                <th class="text-right white--text">Cant</th>
+                <th class="text-right white--text">Precio Unitario</th>
+                <th class="text-right white--text">IVA</th>
+                <th class="text-right white--text">IBUA</th>
+                <th class="text-right white--text">IPC</th>
+                <th class="text-right white--text">Subtotal</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="detalle in orderDetail.details" :key="detalle.id">
-                <td>{{ detalle.producto.nombre }}</td>
+                <td>
+                  {{ detalle.producto?.codigo_barras || (detalle.subscription?.plan ? 'PLAN-' +
+                    detalle.subscription.plan.id : 'N/A') }}
+                </td>
+
+                <td>
+                  <div v-if="detalle.producto">
+                    {{ detalle.producto.nombre }}
+                  </div>
+                  <div v-else-if="detalle.subscription?.plan">
+                    <strong>Plan:</strong> {{ detalle.subscription.plan.name }}
+                    <div class="text-caption text-grey">Mascota: {{ detalle.subscription.pet?.name || 'N/A' }}</div>
+                  </div>
+                  <div v-else>Servicio general</div>
+                </td>
+
                 <td class="text-right">
-                  {{ Number(detalle.cantidad) % 1 === 0 ? Number(detalle.cantidad) :
-                    Number(detalle.cantidad).toFixed(3)
+                  {{ Number(detalle.cantidad) % 1 === 0 ? Number(detalle.cantidad) : Number(detalle.cantidad).toFixed(3)
                   }}
                 </td>
-                <td class="text-right">${{ parseFloat(detalle.producto.precio_venta).toLocaleString('es-ES') }}</td>
-                <td class="text-right">{{ detalle.iva }}</td>
-                <td class="text-right">{{ detalle.ibua }}</td>
-                <td class="text-right">{{ detalle.ipc }}</td>
+
                 <td class="text-right">
-                  ${{ (Number(detalle.cantidad) * Number(detalle.precio_unitario) + Number(detalle.iva) +
-                    Number(detalle.ibua) + Number(detalle.ipc)).toLocaleString('es-ES') }}
+                  ${{ parseFloat(detalle.precio_unitario).toLocaleString('es-ES') }}
+                </td>
+
+                <td class="text-right">${{ parseFloat(detalle.iva || 0).toLocaleString('es-ES') }}</td>
+                <td class="text-right">${{ parseFloat(detalle.ibua || 0).toLocaleString('es-ES') }}</td>
+                <td class="text-right">${{ parseFloat(detalle.ipc || 0).toLocaleString('es-ES') }}</td>
+
+                <td class="text-right font-weight-bold">
+                  ${{ (
+                    (Number(detalle.cantidad) * Number(detalle.precio_unitario)) +
+                    Number(detalle.iva || 0) +
+                    Number(detalle.ibua || 0) +
+                    Number(detalle.ipc || 0)
+                  ).toLocaleString('es-ES') }}
                 </td>
               </tr>
             </tbody>
           </v-simple-table>
 
-          <!-- Totales -->
           <v-row class="mt-6">
-            <v-col cols="8"></v-col>
+            <v-col cols="8">
+              <v-chip v-if="orderDetail.metodo_pago_nombre" color="blue lighten-4" text-color="blue darken-4">
+                {{ orderDetail.metodo_pago_nombre }}
+              </v-chip>
+            </v-col>
             <v-col cols="4">
               <v-sheet rounded class="pa-4 blue lighten-5 text-right">
                 <h3 class="blue--text font-weight-bold">TOTAL</h3>
@@ -160,14 +186,14 @@
               </v-sheet>
             </v-col>
           </v-row>
+
+          <v-divider class="my-4"></v-divider>
+
+          <!-- Botón Cerrar -->
+          <v-card-actions class="justify-end">
+            <v-btn color="primary" variant="tonal" @click="dialogFactura = false">Cerrar</v-btn>
+          </v-card-actions>
         </v-container>
-
-        <v-divider class="my-4"></v-divider>
-
-        <!-- Botón Cerrar -->
-        <v-card-actions class="justify-end">
-          <v-btn color="primary" variant="tonal" @click="dialogFactura = false">Cerrar</v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -290,11 +316,12 @@
             <v-card border flat class="rounded-lg pa-4 text-center bg-red-lighten-5">
               <div class="text-caption text-red-darken-1">Saldo Pendiente Todos Créditos</div>
               <div class="text-h5 font-weight-black text-error">
-                $ {{ txtregdata.saldoOtrosCreditos ? parseFloat(txtregdata.saldoOtrosCreditos).toLocaleString('es-ES') : '0' }}
-                <v-btn color="success" density="compact" prepend-icon="mdi-cash"  @click="pagarTodo()"
-                    :disabled="!txtregdata.metodo_pago" :loading="spinner">
-                    Pagar Todo
-                  </v-btn>
+                $ {{ txtregdata.saldoOtrosCreditos ? parseFloat(txtregdata.saldoOtrosCreditos).toLocaleString('es-ES') :
+                '0' }}
+                <v-btn color="success" density="compact" prepend-icon="mdi-cash" @click="pagarTodo()"
+                  :disabled="!txtregdata.metodo_pago" :loading="spinner">
+                  Pagar Todo
+                </v-btn>
               </div>
             </v-card>
           </v-col>
@@ -319,10 +346,10 @@
                   </v-btn>
                 </td>
                 <td class="pt-4">
-                  <v-text-field v-model="txtregdata.monto" prefix="$" type="number" variant="outlined" density="compact" v-solo-enteros
-                    placeholder="0.00" class="rounded-lg"></v-text-field>
-                  <v-checkbox v-model="txtregdata.monto" :value="txtregdata.saldo" label="Pagar saldo total" v-solo-enteros
-                    color="success" density="compact" hide-details></v-checkbox>
+                  <v-text-field v-model="txtregdata.monto" prefix="$" type="number" variant="outlined" density="compact"
+                    v-solo-enteros placeholder="0.00" class="rounded-lg"></v-text-field>
+                  <v-checkbox v-model="txtregdata.monto" :value="txtregdata.saldo" label="Pagar saldo total"
+                    v-solo-enteros color="success" density="compact" hide-details></v-checkbox>
                 </td>
                 <td>
                   <v-select v-model="txtregdata.metodo_pago" :items="metodosPago" label="Seleccione" variant="outlined"
@@ -332,7 +359,7 @@
                   <v-btn color="success" variant="elevated" prepend-icon="mdi-plus-circle"
                     :disabled="!txtregdata.metodo_pago || !txtregdata.monto" @click="registrar()" :loading="spinner">
                     Abonar
-                  </v-btn>                   
+                  </v-btn>
                 </td>
               </tr>
             </tbody>
@@ -370,7 +397,7 @@
               <td colspan="3" class="text-center py-4 text-grey italic">No hay abonos registrados</td>
             </tr>
           </tbody>
-        </v-table>        
+        </v-table>
 
       </v-card-text>
 
