@@ -39,9 +39,6 @@
           Factura No.
         </th>
         <th class="text-left">
-          ID Caja
-        </th>
-        <th class="text-left">
           Vendedor
         </th>
         <th class="text-left">
@@ -73,7 +70,6 @@
       <tr v-for="ord in ordersList.data" :key="ord.id">
 
         <td><small>{{ ord.factura_numero }}</small></td>
-        <td><small>{{ ord.caja_id ?? '' }}</small></td>
         <td><small>{{ ord.user?.nombres ?? '' }} , {{ ord.user.apellidos ?? '' }}</small></td>
         <td><small>{{ ord.client.nombres ?? '' }} , {{ ord.client.apellidos ?? '' }}</small></td>
         <td><small>{{ ord.forma_pago_nombre }}/{{ ord.metodo_pago_nombre }}</small></td>
@@ -140,8 +136,6 @@
                 <th class="text-right white--text">Cant</th>
                 <th class="text-right white--text">Precio Unitario</th>
                 <th class="text-right white--text">IVA</th>
-                <th class="text-right white--text">IBUA</th>
-                <th class="text-right white--text">IPC</th>
                 <th class="text-right white--text">Subtotal</th>
               </tr>
             </thead>
@@ -157,25 +151,19 @@
                     {{ detalle.producto.nombre }}
                   </div>
                   <div v-else-if="detalle.subscription?.plan">
-                    <strong>Plan:</strong> {{ detalle.subscription.plan.name }}
+                    <strong>Plan:</strong> {{ detalle.subscription.plan.name }}-{{ detalle.subscription.plan.description }}
                     <div class="text-caption text-grey">Mascota: {{ detalle.subscription.pet?.name || 'N/A' }}</div>
                   </div>
                   <div v-else>Servicio general</div>
                 </td>
-
                 <td class="text-right">
                   {{ Number(detalle.cantidad) % 1 === 0 ? Number(detalle.cantidad) : Number(detalle.cantidad).toFixed(3)
                   }}
                 </td>
-
                 <td class="text-right">
                   ${{ parseFloat(detalle.precio_unitario).toLocaleString('es-ES') }}
                 </td>
-
-                <td class="text-right">${{ parseFloat(detalle.iva || 0).toLocaleString('es-ES') }}</td>
-                <td class="text-right">${{ parseFloat(detalle.ibua || 0).toLocaleString('es-ES') }}</td>
-                <td class="text-right">${{ parseFloat(detalle.ipc || 0).toLocaleString('es-ES') }}</td>
-
+                <td class="text-right">${{ parseFloat(detalle.iva || 0).toLocaleString('es-ES') }}</td> 
                 <td class="text-right font-weight-bold">
                   ${{ (
                     (Number(detalle.cantidad) * Number(detalle.precio_unitario)) +
@@ -339,6 +327,7 @@ const recargarIframe = () => {
 
 const verFactura = async (id) => {
   const res = await axiosInst.get(url + 'api/ordershow/' + id);
+  console.log(res.data)
   orderDetail.value = res.data;
 }
 
