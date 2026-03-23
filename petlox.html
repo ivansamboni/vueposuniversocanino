@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petlox — Cuidado Premium para tu Mascota</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FDF6EE;
+    --warm: #F5E6D3;
+    --orange: #E8622A;
+    --orange-light: #F2895C;
+    --dark: #1A1208;
+    --brown: #6B3F1C;
+    --text: #3D2B1A;
+    --muted: #9C7A5E;
+    --white: #FFFFFF;
+    --card-bg: #FFF9F3;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 6%;
+    background: rgba(253,246,238,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(232,98,42,0.12);
+    transition: box-shadow .3s;
+  }
+  nav.scrolled { box-shadow: 0 4px 30px rgba(26,18,8,.08); }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 900;
+    color: var(--orange);
+    letter-spacing: -1px;
+  }
+  .nav-logo span { color: var(--dark); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-size: .9rem; font-weight: 500; color: var(--text);
+    text-decoration: none; letter-spacing: .03em;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--orange); }
+  .nav-cta {
+    background: var(--orange); color: var(--white);
+    padding: .65rem 1.6rem; border-radius: 50px;
+    font-size: .88rem; font-weight: 500;
+    text-decoration: none; transition: background .2s, transform .2s;
+  }
+  .nav-cta:hover { background: var(--brown); transform: translateY(-1px); }
+  .nav-burger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+  .nav-burger span { width: 24px; height: 2px; background: var(--dark); border-radius: 2px; transition: .3s; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 8rem 6% 4rem;
+    position: relative; overflow: hidden;
+    background: var(--cream);
+  }
+  .hero::before {
+    content: '';
+    position: absolute; right: -100px; top: -100px;
+    width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, #F5E6D3 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-text { position: relative; z-index: 2; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--warm); border: 1px solid rgba(232,98,42,.25);
+    padding: .45rem 1.1rem; border-radius: 50px;
+    font-size: .82rem; font-weight: 500; color: var(--orange);
+    margin-bottom: 1.8rem;
+    animation: fadeUp .6s ease both;
+  }
+  .hero-badge::before { content: '🐾'; }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    line-height: 1.08; font-weight: 900;
+    color: var(--dark); margin-bottom: 1.4rem;
+    animation: fadeUp .6s .1s ease both;
+  }
+  h1 em { font-style: italic; color: var(--orange); }
+  .hero-sub {
+    font-size: 1.05rem; color: var(--muted);
+    line-height: 1.7; max-width: 440px;
+    margin-bottom: 2.4rem;
+    animation: fadeUp .6s .2s ease both;
+  }
+  .hero-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp .6s .3s ease both;
+  }
+  .btn-primary {
+    background: var(--orange); color: var(--white);
+    padding: .85rem 2rem; border-radius: 50px;
+    font-size: .95rem; font-weight: 500;
+    text-decoration: none; transition: all .25s;
+    box-shadow: 0 8px 24px rgba(232,98,42,.3);
+  }
+  .btn-primary:hover { background: var(--brown); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(232,98,42,.4); }
+  .btn-ghost {
+    color: var(--dark); padding: .85rem 2rem; border-radius: 50px;
+    font-size: .95rem; font-weight: 500;
+    text-decoration: none; border: 2px solid rgba(26,18,8,.15);
+    transition: all .25s;
+  }
+  .btn-ghost:hover { border-color: var(--orange); color: var(--orange); }
+  .hero-stats {
+    display: flex; gap: 2rem; margin-top: 3rem;
+    animation: fadeUp .6s .4s ease both;
+  }
+  .stat-item h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; color: var(--orange); font-weight: 900;
+  }
+  .stat-item p { font-size: .82rem; color: var(--muted); margin-top: .2rem; }
+
+  .hero-visual {
+    position: relative; display: flex;
+    justify-content: center; align-items: center;
+    animation: fadeLeft .7s .2s ease both;
+  }
+  .hero-img-wrap {
+    width: min(480px, 90%); aspect-ratio: 1;
+    border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%;
+    background: var(--warm);
+    display: flex; align-items: flex-end; justify-content: center;
+    overflow: hidden;
+    animation: morph 8s ease-in-out infinite;
+    box-shadow: 0 30px 80px rgba(107,63,28,.15);
+  }
+  .hero-img-wrap img { width: 85%; object-fit: cover; }
+  .hero-float {
+    position: absolute;
+    background: var(--white); border-radius: 20px;
+    padding: .8rem 1.2rem;
+    box-shadow: 0 8px 32px rgba(26,18,8,.12);
+    display: flex; align-items: center; gap: .7rem;
+    font-size: .82rem; font-weight: 500;
+  }
+  .hero-float.f1 { top: 15%; left: 2%; animation: float 4s ease-in-out infinite; }
+  .hero-float.f2 { bottom: 22%; right: 2%; animation: float 4s 2s ease-in-out infinite; }
+  .hero-float .icon { font-size: 1.4rem; }
+  .hero-float small { display: block; font-size: .72rem; color: var(--muted); font-weight: 400; }
+
+  .paw-bg {
+    position: absolute; opacity: .06; font-size: 8rem;
+    user-select: none; pointer-events: none;
+  }
+  .paw-bg.p1 { top: 10%; left: 5%; transform: rotate(-20deg); }
+  .paw-bg.p2 { bottom: 15%; right: 8%; transform: rotate(30deg); font-size: 5rem; }
+
+  /* ── SERVICES ── */
+  .services {
+    padding: 6rem 6%;
+    background: var(--dark);
+    position: relative;
+  }
+  .services::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 80px;
+    background: var(--cream);
+    border-radius: 0 0 60px 60px;
+  }
+  .section-label {
+    font-size: .8rem; font-weight: 500; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--orange);
+    display: block; margin-bottom: .8rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    color: var(--white); font-weight: 900;
+    line-height: 1.15; margin-bottom: 1rem;
+  }
+  .section-title.dark { color: var(--dark); }
+  .section-sub { color: var(--muted); max-width: 500px; line-height: 1.7; }
+  .section-head { margin-bottom: 3.5rem; }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .service-card {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 24px; padding: 2rem;
+    transition: all .3s; cursor: default;
+    position: relative; overflow: hidden;
+  }
+  .service-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: var(--orange);
+    transform: scaleX(0); transition: transform .3s;
+  }
+  .service-card:hover { background: rgba(255,255,255,.08); transform: translateY(-4px); }
+  .service-card:hover::after { transform: scaleX(1); }
+  .service-icon { font-size: 2.5rem; margin-bottom: 1.2rem; display: block; }
+  .service-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem; color: var(--white);
+    margin-bottom: .7rem; font-weight: 700;
+  }
+  .service-card p { font-size: .88rem; color: rgba(255,255,255,.5); line-height: 1.7; }
+
+  /* ── ABOUT / NUMBERS ── */
+  .numbers {
+    padding: 5rem 6%;
+    background: var(--orange);
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2rem; text-align: center;
+  }
+  .num-item h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; color: var(--white); font-weight: 900;
+  }
+  .num-item p { color: rgba(255,255,255,.8); font-size: .9rem; margin-top: .3rem; }
+
+  /* ── PRICING ── */
+  .pricing {
+    padding: 7rem 6%;
+    background: var(--cream);
+  }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem; margin-top: 3.5rem; align-items: center;
+  }
+  .pricing-card {
+    background: var(--card-bg);
+    border: 2px solid transparent;
+    border-radius: 28px; padding: 2.5rem;
+    transition: all .3s; position: relative;
+    overflow: hidden;
+  }
+  .pricing-card.featured {
+    background: var(--dark);
+    border-color: var(--orange);
+    transform: scale(1.04);
+    box-shadow: 0 20px 60px rgba(26,18,8,.2);
+  }
+  .pricing-card:not(.featured):hover {
+    border-color: var(--orange);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(232,98,42,.12);
+  }
+  .plan-badge {
+    display: inline-block;
+    background: var(--orange); color: var(--white);
+    font-size: .72rem; font-weight: 500; letter-spacing: .1em;
+    text-transform: uppercase; padding: .3rem .9rem; border-radius: 50px;
+    margin-bottom: 1.2rem;
+  }
+  .pricing-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; margin-bottom: 1rem; font-weight: 700;
+    color: var(--dark);
+  }
+  .pricing-card.featured h3 { color: var(--white); }
+  .price-wrap { display: flex; align-items: flex-end; gap: .3rem; margin-bottom: 1.8rem; }
+  .price-sym { font-size: 1.5rem; font-weight: 700; color: var(--orange); line-height: 1; }
+  .price-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem; font-weight: 900; line-height: 1;
+    color: var(--dark);
+  }
+  .pricing-card.featured .price-num { color: var(--white); }
+  .price-per { font-size: .85rem; color: var(--muted); padding-bottom: .4rem; }
+  .pricing-card.featured .price-per { color: rgba(255,255,255,.5); }
+  .feature-list { list-style: none; margin-bottom: 2rem; display: flex; flex-direction: column; gap: .7rem; }
+  .feature-list li {
+    font-size: .88rem; color: var(--text);
+    display: flex; align-items: center; gap: .6rem;
+  }
+  .pricing-card.featured .feature-list li { color: rgba(255,255,255,.75); }
+  .feature-list li::before { content: '✓'; color: var(--orange); font-weight: 700; }
+  .btn-plan {
+    display: block; text-align: center;
+    padding: .9rem; border-radius: 50px;
+    font-size: .9rem; font-weight: 500;
+    text-decoration: none; transition: all .25s;
+    background: transparent;
+    border: 2px solid rgba(26,18,8,.2);
+    color: var(--dark);
+  }
+  .pricing-card.featured .btn-plan {
+    background: var(--orange); border-color: var(--orange);
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(232,98,42,.35);
+  }
+  .btn-plan:hover { border-color: var(--orange); color: var(--orange); }
+  .pricing-card.featured .btn-plan:hover { background: var(--orange-light); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials {
+    padding: 7rem 6%;
+    background: var(--warm);
+    position: relative; overflow: hidden;
+  }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem; margin-top: 3.5rem;
+  }
+  .testimonial-card {
+    background: var(--white); border-radius: 24px;
+    padding: 2rem; position: relative;
+    box-shadow: 0 4px 20px rgba(26,18,8,.06);
+    transition: transform .3s, box-shadow .3s;
+  }
+  .testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(26,18,8,.1); }
+  .quote-icon {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; color: var(--orange); line-height: .8;
+    margin-bottom: .5rem; display: block;
+  }
+  .testimonial-card p { font-size: .92rem; color: var(--text); line-height: 1.75; margin-bottom: 1.5rem; }
+  .reviewer { display: flex; align-items: center; gap: .8rem; }
+  .reviewer-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--warm); display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+  }
+  .reviewer h4 { font-size: .9rem; font-weight: 500; color: var(--dark); }
+  .reviewer span { font-size: .78rem; color: var(--muted); }
+  .stars { color: #F5B93E; font-size: .85rem; margin-bottom: .3rem; }
+
+  /* ── BLOG ── */
+  .blog {
+    padding: 7rem 6%;
+    background: var(--cream);
+  }
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem; margin-top: 3.5rem;
+  }
+  .blog-card {
+    border-radius: 24px; overflow: hidden;
+    background: var(--card-bg);
+    border: 1px solid rgba(26,18,8,.06);
+    transition: transform .3s, box-shadow .3s;
+  }
+  .blog-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(26,18,8,.1); }
+  .blog-thumb {
+    height: 200px;
+    background: var(--warm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; position: relative; overflow: hidden;
+  }
+  .blog-thumb-gradient {
+    position: absolute; inset: 0;
+    opacity: .35;
+  }
+  .blog-body { padding: 1.6rem; }
+  .blog-meta {
+    display: flex; gap: 1rem;
+    font-size: .78rem; color: var(--muted); margin-bottom: .8rem;
+  }
+  .blog-meta span::before { content: '· '; color: var(--orange); }
+  .blog-meta span:first-child::before { content: ''; }
+  .blog-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; font-weight: 700;
+    color: var(--dark); margin-bottom: .7rem; line-height: 1.35;
+  }
+  .blog-card p { font-size: .85rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.2rem; }
+  .blog-link {
+    font-size: .85rem; font-weight: 500; color: var(--orange);
+    text-decoration: none; display: inline-flex; align-items: center; gap: .3rem;
+    transition: gap .2s;
+  }
+  .blog-link:hover { gap: .6rem; }
+
+  /* ── NEWSLETTER ── */
+  .newsletter {
+    padding: 5rem 6%;
+    background: var(--dark);
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .newsletter h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    color: var(--white); font-weight: 900;
+    margin-bottom: 1rem;
+  }
+  .newsletter p { color: rgba(255,255,255,.5); margin-bottom: 2rem; }
+  .newsletter-form {
+    display: flex; gap: 0; max-width: 480px;
+    margin: 0 auto;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50px; overflow: hidden; padding: .25rem;
+  }
+  .newsletter-form input {
+    flex: 1; background: transparent; border: none; outline: none;
+    padding: .75rem 1.2rem; font-size: .9rem; color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .newsletter-form input::placeholder { color: rgba(255,255,255,.35); }
+  .newsletter-form button {
+    background: var(--orange); color: var(--white);
+    border: none; padding: .75rem 1.6rem; border-radius: 50px;
+    font-size: .88rem; font-weight: 500; cursor: pointer;
+    transition: background .2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .newsletter-form button:hover { background: var(--orange-light); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #110D06;
+    padding: 4rem 6% 2rem;
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 3rem; padding-bottom: 3rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .footer-brand .nav-logo { font-size: 2rem; display: block; margin-bottom: 1rem; }
+  .footer-brand p { font-size: .88rem; color: rgba(255,255,255,.4); line-height: 1.7; max-width: 300px; }
+  .footer-socials { display: flex; gap: .8rem; margin-top: 1.5rem; }
+  .social-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; text-decoration: none;
+    transition: all .2s;
+  }
+  .social-btn:hover { background: var(--orange); border-color: var(--orange); }
+  .footer-col h4 {
+    font-size: .82rem; font-weight: 500; letter-spacing: .12em;
+    text-transform: uppercase; color: rgba(255,255,255,.4);
+    margin-bottom: 1.2rem;
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+  .footer-col ul li { font-size: .88rem; color: rgba(255,255,255,.55); }
+  .footer-col ul li a { color: inherit; text-decoration: none; transition: color .2s; }
+  .footer-col ul li a:hover { color: var(--orange); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 2rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-bottom p { font-size: .8rem; color: rgba(255,255,255,.3); }
+  .footer-bottom a { color: var(--orange); text-decoration: none; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes morph {
+    0%, 100% { border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%; }
+    33% { border-radius: 55% 45% 40% 60% / 60% 55% 45% 40%; }
+    66% { border-radius: 45% 55% 60% 40% / 40% 60% 55% 45%; }
+  }
+
+  /* scroll reveal */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s, transform .6s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; padding-top: 7rem; text-align: center; gap: 3rem; }
+    .hero-sub { margin: 0 auto 2rem; }
+    .hero-actions { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    .hero-visual { order: -1; }
+    .hero-float.f1 { left: -5%; }
+    .hero-float.f2 { right: -5%; }
+    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+    .nav-links, .nav-cta { display: none; }
+    .nav-burger { display: flex; }
+    nav { padding: 1rem 5%; }
+    .pricing-card.featured { transform: none; }
+    .numbers { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">Pet<span>lox</span></div>
+  <ul class="nav-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#precios">Precios</a></li>
+    <li><a href="#testimonios">Testimonios</a></li>
+    <li><a href="#blog">Blog</a></li>
+  </ul>
+  <a href="#contacto" class="nav-cta">Reservar ahora</a>
+  <div class="nav-burger" onclick="document.querySelector('.nav-links').style.display='flex';document.querySelector('.nav-links').style.flexDirection='column';document.querySelector('.nav-links').style.position='fixed';document.querySelector('.nav-links').style.top='70px';document.querySelector('.nav-links').style.left='0';document.querySelector('.nav-links').style.right='0';document.querySelector('.nav-links').style.background='var(--cream)';document.querySelector('.nav-links').style.padding='2rem';document.querySelector('.nav-links').style.zIndex='99';">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="paw-bg p1">🐾</div>
+  <div class="paw-bg p2">🐾</div>
+
+  <div class="hero-text">
+    <span class="hero-badge">Cuidado profesional desde 2015</span>
+    <h1>El mejor hogar<br>para tu <em>mascota</em></h1>
+    <p class="hero-sub">En Petlox tratamos a cada mascota como si fuera de nuestra familia. Salud, bienestar y felicidad garantizados.</p>
+    <div class="hero-actions">
+      <a href="#precios" class="btn-primary">Ver paquetes</a>
+      <a href="#servicios" class="btn-ghost">Conocer servicios</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <h3>50k+</h3>
+        <p>Clientes felices</p>
+      </div>
+      <div class="stat-item">
+        <h3>35</h3>
+        <p>Especialistas</p>
+      </div>
+      <div class="stat-item">
+        <h3>99%</h3>
+        <p>Satisfacción</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-img-wrap">
+      <!-- Placeholder visual de perro usando emoji grande -->
+      <div style="font-size:14rem;line-height:1;padding-bottom:1rem;filter:drop-shadow(0 10px 30px rgba(0,0,0,.15))">🐶</div>
+    </div>
+    <div class="hero-float f1">
+      <div class="icon">⭐</div>
+      <div>
+        <strong>4.9 / 5</strong>
+        <small>Valoración media</small>
+      </div>
+    </div>
+    <div class="hero-float f2">
+      <div class="icon">📅</div>
+      <div>
+        <strong>Cita hoy</strong>
+        <small>Disponibilidad inmediata</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section class="services" id="servicios">
+  <div class="section-head reveal">
+    <span class="section-label">Lo que ofrecemos</span>
+    <h2 class="section-title">Servicios diseñados<br>para cada mascota</h2>
+    <p class="section-sub">Desde cuidado nocturno hasta peluquería especializada, cubrimos todas las necesidades de tu compañero.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <span class="service-icon">🌙</span>
+      <h3>Cuidado Nocturno</h3>
+      <p>Tu mascota estará segura y feliz mientras tú descansas. Supervisión constante las 24 horas.</p>
+    </div>
+    <div class="service-card reveal">
+      <span class="service-icon">🦮</span>
+      <h3>Paseo de Mascotas</h3>
+      <p>Paseos diarios adaptados al ritmo y necesidades de tu perro. Ejercicio y socialización garantizados.</p>
+    </div>
+    <div class="service-card reveal">
+      <span class="service-icon">✂️</span>
+      <h3>Peluquería Canina</h3>
+      <p>Baño, corte y cuidado del pelaje con productos premium. Tu mascota lucirá impecable.</p>
+    </div>
+    <div class="service-card reveal">
+      <span class="service-icon">💉</span>
+      <h3>Vacunación</h3>
+      <p>Programa de vacunación completo y seguimiento veterinario personalizado para tu mascota.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NÚMEROS -->
+<div class="numbers">
+  <div class="num-item reveal">
+    <h2>105+</h2>
+    <p>Premios ganados</p>
+  </div>
+  <div class="num-item reveal">
+    <h2>50k</h2>
+    <p>Clientes felices</p>
+  </div>
+  <div class="num-item reveal">
+    <h2>35+</h2>
+    <p>Miembros del equipo</p>
+  </div>
+  <div class="num-item reveal">
+    <h2>99%</h2>
+    <p>Nivel de satisfacción</p>
+  </div>
+</div>
+
+<!-- PRECIOS -->
+<section class="pricing" id="precios">
+  <div class="section-head reveal" style="text-align:center">
+    <span class="section-label">Nuestros planes</span>
+    <h2 class="section-title dark">Paquetes especiales<br>para tu mascota</h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal">
+      <span class="plan-badge">Básico</span>
+      <h3>Pack Amigo</h3>
+      <div class="price-wrap">
+        <span class="price-sym">$</span>
+        <span class="price-num">100</span>
+        <span class="price-per">/ visita</span>
+      </div>
+      <ul class="feature-list">
+        <li>Servicio por 15 días</li>
+        <li>Baño completo</li>
+        <li>Revisión básica</li>
+        <li>Peluquería</li>
+        <li>Corte de uñas</li>
+      </ul>
+      <a href="#contacto" class="btn-plan">Elegir plan</a>
+    </div>
+
+    <div class="pricing-card featured reveal">
+      <span class="plan-badge">Más popular</span>
+      <h3>Pack Exclusivo</h3>
+      <div class="price-wrap">
+        <span class="price-sym">$</span>
+        <span class="price-num">185</span>
+        <span class="price-per">/ visita</span>
+      </div>
+      <ul class="feature-list">
+        <li>Servicio por 15 días</li>
+        <li>Baño completo</li>
+        <li>Revisión intensiva</li>
+        <li>Peluquería premium</li>
+        <li>Corte de uñas</li>
+        <li>Control de caída de pelo</li>
+        <li>Snacks saludables</li>
+        <li>Parque y juegos</li>
+      </ul>
+      <a href="#contacto" class="btn-plan">Elegir plan</a>
+    </div>
+
+    <div class="pricing-card reveal">
+      <span class="plan-badge">Familiar</span>
+      <h3>Pack Familia</h3>
+      <div class="price-wrap">
+        <span class="price-sym">$</span>
+        <span class="price-num">225</span>
+        <span class="price-per">/ visita</span>
+      </div>
+      <ul class="feature-list">
+        <li>Hasta 3 mascotas</li>
+        <li>Baño completo</li>
+        <li>Revisión intensiva</li>
+        <li>Peluquería</li>
+        <li>Corte de uñas</li>
+      </ul>
+      <a href="#contacto" class="btn-plan">Elegir plan</a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIOS -->
+<section class="testimonials" id="testimonios">
+  <div class="section-head reveal" style="text-align:center">
+    <span class="section-label">Testimonios</span>
+    <h2 class="section-title dark">Lo que dicen los<br>amantes de mascotas</h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <span class="quote-icon">"</span>
+      <div class="stars">★★★★★</div>
+      <p>Amables, profesionales y cariñosos con mi perro. Lo llevaron con una sonrisa y lo devolvieron feliz y limpio. Recomiendo Petlox a todos mis amigos.</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">👨</div>
+        <div>
+          <h4>Miguel Ángel</h4>
+          <span>Dueño de Labrador</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <span class="quote-icon">"</span>
+      <div class="stars">★★★★★</div>
+      <p>Mi gata siempre llega transformada. El equipo tiene una paciencia increíble y se nota que aman a los animales. No cambiaría Petlox por nada.</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">👩</div>
+        <div>
+          <h4>Carolina Reyes</h4>
+          <span>Dueña de gato persa</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <span class="quote-icon">"</span>
+      <div class="stars">★★★★★</div>
+      <p>Desde la primera visita supe que estaba en buenas manos. Puntuales, detallistas y siempre pendientes del bienestar de mi mascota. Servicio de 10.</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">🧑</div>
+        <div>
+          <h4>Sebastián Torres</h4>
+          <span>Dueño de Bulldog Francés</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section class="blog" id="blog">
+  <div class="section-head reveal" style="text-align:center">
+    <span class="section-label">Nuestro Blog</span>
+    <h2 class="section-title dark">Últimas noticias<br>y consejos</h2>
+  </div>
+  <div class="blog-grid">
+    <div class="blog-card reveal">
+      <div class="blog-thumb">
+        <div class="blog-thumb-gradient" style="background:linear-gradient(135deg,#F5E6D3,#E8622A)"></div>
+        🐕
+      </div>
+      <div class="blog-body">
+        <div class="blog-meta">
+          <span>Por el equipo Petlox</span>
+          <span>3 Sep, 2025</span>
+        </div>
+        <h3>Cómo pasear a tu perro en días de frío extremo</h3>
+        <p>Consejos prácticos para mantener a tu perro activo y saludable durante el invierno sin comprometer su bienestar.</p>
+        <a href="#" class="blog-link">Leer más →</a>
+      </div>
+    </div>
+    <div class="blog-card reveal">
+      <div class="blog-thumb">
+        <div class="blog-thumb-gradient" style="background:linear-gradient(135deg,#FFF7E5,#F5B93E)"></div>
+        🧸
+      </div>
+      <div class="blog-body">
+        <div class="blog-meta">
+          <span>Por el equipo Petlox</span>
+          <span>3 Sep, 2025</span>
+        </div>
+        <h3>Estos juguetes pueden ser peligrosos para tu mascota</h3>
+        <p>Te explicamos qué juguetes evitar y cuáles son los más seguros para que tu mascota juegue sin riesgos.</p>
+        <a href="#" class="blog-link">Leer más →</a>
+      </div>
+    </div>
+    <div class="blog-card reveal">
+      <div class="blog-thumb">
+        <div class="blog-thumb-gradient" style="background:linear-gradient(135deg,#E8F5E9,#4CAF50)"></div>
+        🐱
+      </div>
+      <div class="blog-body">
+        <div class="blog-meta">
+          <span>Por el equipo Petlox</span>
+          <span>3 Sep, 2025</span>
+        </div>
+        <h3>Cómo crear un espacio seguro y cómodo para tu gato</h3>
+        <p>Guía completa para diseñar el hogar perfecto para tu felino: zonas de descanso, juego y privacidad.</p>
+        <a href="#" class="blog-link">Leer más →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter" id="contacto">
+  <div style="position:relative;z-index:2">
+    <h2>Suscríbete y recibe<br>consejos para tu mascota</h2>
+    <p>Noticias, ofertas y tips semanales directo a tu correo.</p>
+    <div class="newsletter-form">
+      <input type="email" placeholder="tu@correo.com">
+      <button>Suscribirse</button>
+    </div>
+  </div>
+  <div style="position:absolute;opacity:.05;font-size:20rem;bottom:-4rem;right:-3rem;pointer-events:none">🐾</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <span class="nav-logo">Pet<span>lox</span></span>
+      <p>La mejor agencia de cuidado de mascotas. Porque tu compañero merece lo mejor de nosotros cada día.</p>
+      <div class="footer-socials">
+        <a class="social-btn" href="#">📘</a>
+        <a class="social-btn" href="#">🐦</a>
+        <a class="social-btn" href="#">📸</a>
+        <a class="social-btn" href="#">💼</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul>
+        <li>petlox@gmail.com</li>
+        <li>+(57) 300 555 0112</li>
+        <li>Calle 10 #43A-22<br>Medellín, Colombia</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Enlaces rápidos</h4>
+      <ul>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#precios">Planes</a></li>
+        <li><a href="#blog">Blog</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Petlox. Todos los derechos reservados.</p>
+    <p><a href="#">Privacidad</a> · <a href="#">Términos</a> · <a href="#">FAQ</a></p>
+  </div>
+</footer>
+
+<script>
+  // Navbar scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
